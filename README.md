@@ -1,97 +1,67 @@
-# Проект Mesto фронтенд + бэкенд
+# Здесь будет ваш проект на Реакте с авторизацией и регистрацией
 
-## Директории
+Используйте ваши предыдущие наработки по проекту Mesto. 
+Это может быть работа 11-го спринта или его улучшенная версия
+после 2-х последних спринтов.
 
-`/routes` — папка с файлами роутера  
-`/controllers` — папка с файлами контроллеров пользователя и карточки   
-`/models` — папка с файлами описания схем пользователя и карточки  
-  
-Остальные директории вспомогательные, создаются при необходимости разработчиком
+Все запросы на авторизацию, регистрацию и проверку токена 
+должны работать через сервис `https://auth.nomoreparties.co`.
+Остальные запросы, не относящиеся к этой проектной работе
+могут быть к бэкенду из предыдущих спринтов.
 
-## Запуск проекта
 
-`npm run start` — запускает сервер   
-`npm run dev` — запускает сервер с hot-reload
-Install ESLint either locally or globally. (Note that locally, per project, is strongly preferred)
 
-$ npm install eslint --save-dev
-If you installed ESLint globally, you have to install React plugin globally too. Otherwise, install it locally.
+Инфраструктура проекта
+Создайте проект
+Создайте папку с проектом и инициализируйте в ней package.json.
+Настройте editorconfig
 
-$ npm install eslint-plugin-react --save-dev
-Configuration
-Use our preset to get reasonable defaults:
+Затем создайте в корне проекта файл .editorconfig и скопируйте туда настройки:
+# http://editorconfig.org
+Настройте линтер eslint
+Он отлавливает ошибки и следит за единообразием кода.  
+Мы будем работать по самому популярному стайлгайду — Airbnb.
+Для начала установите три dev-зависимости:
+Сам ESLint. 
+Ещё две dev-зависимости:
+eslint-config-airbnb-base
+eslint-plugin-import
 
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended"
-  ]
-If you are using the new JSX transform from React 17, extend react/jsx-runtime in your eslint config (add "plugin:react/jsx-runtime" to "extends") to disable the relevant rules.
-
-You should also specify settings that will be shared across all the plugin rules. (More about eslint shared settings)
-
+В корне проекта создайте файл .eslintrc и добавьте в него:
 {
-  "settings": {
-    "react": {
-      "createClass": "createReactClass", // Regex for Component Factory to use,
-                                         // default to "createReactClass"
-      "pragma": "React",  // Pragma to use, default to "React"
-      "fragment": "Fragment",  // Fragment to use (may be a property of <pragma>), default to "Fragment"
-      "version": "detect", // React version. "detect" automatically picks the version you have installed.
-                           // You can also use `16.0`, `16.3`, etc, if you want to override the detected value.
-                           // default to latest and warns if missing
-                           // It will default to "detect" in the future
-      "flowVersion": "0.53" // Flow version
-    },
-    "propWrapperFunctions": [
-        // The names of any function used to wrap propTypes, e.g. `forbidExtraProps`. If this isn't set, any propTypes wrapped in a function will be skipped.
-        "forbidExtraProps",
-        {"property": "freeze", "object": "Object"},
-        {"property": "myFavoriteWrapper"},
-        // for rules that check exact prop wrappers
-        {"property": "forbidExtraProps", "exact": true}
-    ],
-    "componentWrapperFunctions": [
-        // The name of any function used to wrap components, e.g. Mobx `observer` function. If this isn't set, components wrapped by these functions will be skipped.
-        "observer", // `property`
-        {"property": "styled"}, // `object` is optional
-        {"property": "observer", "object": "Mobx"},
-        {"property": "observer", "object": "<pragma>"} // sets `object` to whatever value `settings.react.pragma` is set to
-    ],
-    "formComponents": [
-      // Components used as alternatives to <form> for forms, eg. <Form endpoint={ url } />
-      "CustomForm",
-      {"name": "Form", "formAttribute": "endpoint"}
-    ]
-    "linkComponents": [
-      // Components used as alternatives to <a> for linking, eg. <Link to={ url } />
-      "Hyperlink",
-      {"name": "Link", "linkAttribute": "to"}
-    ]
-  }
+"extends": "airbnb-base"
 }
-If you do not use a preset you will need to specify individual rules and add extra configuration.
+В файл package.json добавьте новую команду lint.
+При её запуске выполняется запуск eslint: npx eslint ..
 
-Add "react" to the plugins section.
+eslint в редактор код
+Добавьте исключение _id
+ .eslintrc добавьте исключение для идентификатора _id.
+Стайлгайд Airbnb.
 
-{
-  "plugins": [
-    "react"
-  ]
-}
-Enable JSX support.
+Инициализируйте git-репозиторий
+Инициализируйте git-репозиторий в корне проекта и создайте файл .gitignore:
+vim .gitignore
+git add .gitignore
 
-With ESLint 2+
+Точку входа — файл app.js
+Заведите в нём express-сервер и настройте его запуск на 3000 порту.
+npm run start 
 
-{
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    }
-  }
-}
-Enable the rules that you would like to use.
+Настройте хот релоуд-установите пакет nodemon
+Приложение с хот релоудом должно запускаться командой:
+npm run dev 
 
-  "rules": {
-    "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error",
-  }
+База данных, контроллеры и роуты для карточек и пользователей
+Подключитесь к Mongo
+В app.js подключитесь к серверу MongoDB по адресу:
+mongodb://localhost:27017/mestodb
+xcode-select --install
+sudo xcodebuild -license
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+brew tap mongodb/brew
+brew install mongodb-community@4.4
+Для запуска: brew services start mongodb-community@4.2
+Сервер запущен
+Ссылка на установщик Compass: https://www.mongodb.com/download-center/compass.
+
