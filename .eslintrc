@@ -13,7 +13,6 @@ module.exports = {
         "ecmaVersion": 12
     },
 
-  .eslintrc
   "rules": {
     "no-underscore-dangle": [ "error",
       {
