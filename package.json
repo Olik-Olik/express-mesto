@@ -8,8 +8,12 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "body-parser": "^1.19.0",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-react": "^7.26.0",
+    "nodemon": "^2.0.13",
     "express": "^4.17.1",
     "mongoose": "^6.0.8",
     "of": "^1.0.0",
@@ -44,8 +48,10 @@
   "homepage": "https://github.com/Olik-Olik/express-mesto.git",
   "devDependencies": {
     "eslint": "^7.32.0",
-    "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.24.2",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-react": "^7.26.0",
     "nodemon": "^2.0.13"
   }

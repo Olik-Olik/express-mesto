@@ -1,7 +1,6 @@
 const router = require('express').Router();
 
-router.get('/', () => {
-  console.log('bbbb');
-}); // корневому каталогу приложения.
+// eslint-disable-next-line no-console
+router.get('/', () => { console.log('get what'); });
 
 module.exports = router;
