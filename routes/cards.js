@@ -1,6 +1,20 @@
-const router = require('express').Router();
+const cardsRouter = require('express').Router();
 
-// eslint-disable-next-line no-console
-router.get('/', () => { console.log('get what'); });
+const { getCards } = require('../controllers/cards');
 
-module.exports = router;
+cardsRouter.get('/', getCards);
+const {
+  likeCard,
+  dislikeCard,
+  createNewCard,
+  deleteCard,
+} = require('../controllers/cards');
+
+cardsRouter.get('/', getCards);
+cardsRouter.post('/', createNewCard);
+cardsRouter.delete('/:id', deleteCard);
+cardsRouter.put('/:id/likes', likeCard);
+cardsRouter.delete('/:id/likes', dislikeCard);
+
+module.exports = cardsRouter;
+

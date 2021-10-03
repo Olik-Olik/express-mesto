@@ -1,7 +1,8 @@
-import {Types} from "mongoose";
+// eslint-disable-next-line import/no-extraneous-dependencies
+// import { Types } from "mongoose";
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 const mongoose = require('mongoose');
-
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -30,7 +31,7 @@ const cardSchema = new mongoose.Schema({
     {
       type: Date,
       required: true,
-      default: Date.now(),
+      default: Date.now,
     },
 });
 module.exports = mongoose.model('card', cardSchema);

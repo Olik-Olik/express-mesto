@@ -11,11 +11,10 @@
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-react": "^7.26.0",
-    "nodemon": "^2.0.13",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "express": "^4.17.1",
-    "mongoose": "^6.0.8",
+    "mongoose": "^5.13.9",
     "of": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -45,14 +44,14 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://github.com/Olik-Olik/express-mesto.git",
+  "homepage": "https://github.com/Olik-Olik/express-mesto",
   "devDependencies": {
     "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.24.2",
     "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-react": "^7.26.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "nodemon": "^2.0.13"
   }
 }
