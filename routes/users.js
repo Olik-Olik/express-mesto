@@ -1,20 +1,26 @@
 const router = require('express').Router();
-
-const {getUsers} = require("../controllers/users");
 // router.get('/', () => { console.log('get it')});
+/*
 const {
   getUsers,
   getUser,
-  createUser,
   updateUser,
-  updateAvatar
-} = require("../controllers/users");
+//  updateUser,
+//  updateAvatar
+};
+*/
+const updateUser = require("../controllers/users").updateUser;
+/*
+router.get('/users', getUsers);
+router.get('/users/:id', getUser);
+*/
 
-router.get('/', getUsers);
-router.get('/:id', getUser);
-router.post('/', createUser)
-router.patch('/me', updateUser);
-router.patch('/me/avatar', updateAvatar);
+/*router.patch('/users/me', /!*body('name').isLength({ min: 2 } || { max: 30}),
+  body('about').isLength({ min: 2 } || { max: 30}),
+  body('avatar'), *!/ updateUser);*/
+
+router.patch('/users/me', updateUser);
+// router.patch('/users/me/avatar', updateAvatar);
 
 
 module.exports = router;
