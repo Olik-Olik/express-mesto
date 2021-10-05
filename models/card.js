@@ -1,7 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-// import { Types } from "mongoose";
-
-// eslint-disable-next-line import/no-extraneous-dependencies
 const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
@@ -19,6 +15,7 @@ const cardSchema = new mongoose.Schema({
   owner:
     {
       type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
       required: true,
     },
   likes:

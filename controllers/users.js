@@ -1,38 +1,40 @@
 // const usersData = require('../users.json');//тестовый
 const express = require('express');
 const { validationResult } = require('express-validator');
-const User = require('../model/user');
+const User = require('../models/user');
 
-// const app = express();
-// Обработка ошибок Может в отдельный файл сложить , подумать
-// const ERROR_NOT_FOUND = 404;
+const app = express();
+
+const ERROR_NOT_FOUND = 404;
 const ERROR_DATA = 400;
-// const ERROR_DEFAULT = 500;
+const ERROR_DEFAULT = 500;
 const ERROR_SUCCESS = 200;
 
+/*
 module.exports.getUsers = (req, res, next) => User.find({})
-  .then((users) => res.status(ERROR_SUCCESS).send({ data: users }))
+  .then((users) => res.status(200).send({ data: users }))
   .catch(next);
 
-/*  User.find({}, (err, result) => {
+/*
+/!*  User.find({}, (err, result) => {
   if (err) {
     console.log(err);
-    res.status(ERROR_DEFAULT).send({ message: 'Ошибка по-умолчанию' });
+    res.status(500).send({ message: 'Ошибка по-умолчанию' });
   } else {
     res.json(result);
   }
-}); */
+}); *!/
 
-/* const getUser = (req, res) => {
+/!* const getUser = (req, res) => {
   const { id } = req.params;
-  return User.findById(id, (err, result) => {
+  User.findById(id, (err, result) => {
     if (err) {
       console.log(err);
       res.status(ERROR_DEFAULT).send({ message: 'Ошибка по-умолчанию' });
     } else {
       res.json(result);
     }
-  }); */
+  }); *!/
 
 module.exports.getUser = (req, res, next) => {
   const id = req.params;
@@ -41,64 +43,48 @@ module.exports.getUser = (req, res, next) => {
     .catch(next);
 };
 
-/*
-const updateUser = (req, res, next) => {
+module.exports.createUser = (req, res, next) => {
+  const { name } = req.body.name;
+  const { about } = req.body.about;
+  const { avatar } = req.body.avatar;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(ERROR_DATA).json({errors: errors.array()});
+    return res.status(ERROR_DATA).json({ errors: errors.array() });
   }
-
-  const {name} = req.body.name;
-  const {about} = req.body.about;
-  const {avatar} = req.body.avatar;
-  const user = new User({
+  return User.create({
     name,
     about,
     avatar,
-  });
-
-  user.save();
-  res.status(ERROR_SUCCESS).json({user})
+  })
+  //  user.save();
+    .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
-
-  /* catch (err) {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
-  } */
-/*
 };
- */
-
-module.exports.updateUser = (req, res) => {
-  // const { name, about } = req.body;
-
+*/
+/*
+module.exports.updateUser = (req, res, next) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
   console.log(`Find by id ${req.user._id}`);
   console.log(`Find by id name ${newName}`);
   console.log(`Find by id body ${req}`);
-//  console.log(req);
-
   return User.findByIdAndUpdate({ _id: req.user._id }, {
-    // name, about,
     name: newName,
     about: newAbout,
   }, { new: true, returnNewDocument: true })
-    .then((user) => res.status(ERROR_SUCCESS).send({ data: user }));
-};
-/*
-const updateAvatar = (req, res) => {
-const {ava} = req.body;
-return User.findById(id,{ ava})
-  .then(user) =>  res.status(ERROR_SUCCESS).send( data:user)
-}
-}
+    .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
+    .catch(next);
+};*/
 
-*/
-// module.exports = {
-//   getUsers, getUser
-  // , updateUser,
-  // updateUser,
-  // updateAvatar,
-// };
+
+
+module.exports.updateAvatar = (req, res, next) => {
+  const { avatar } = req.body;
+  console.log(`Find by id avatar ${avatar}`);
+  console.log(`Ava by id ${req.user._id}`);
+  return User.findByIdAndUpdate({ _id: req.user._id },
+    { avatar },
+    { new: true, returnNewDocument: true })
+    .then((updateAvatar) => res.status(ERROR_SUCCESS).send({ data: updateAvatar }))
+    .catch(next);
+};

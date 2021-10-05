@@ -1,28 +1,45 @@
-/*
-// eslint-disable-next-line import/no-unresolved
-const cardsData = require('../cards.json');
-const User = require("../model/user");
-// Обработка ошибок Может в отдельный файл сложить , подумать
-const ERROR_NOT_FOUND = 404;
+const express = require('express');
+const { validationResult } = require('express-validator');
+// const cardsData = require('../cards.json');
+const Card = require('../models/card');
+// const User = require('../models/user');
+
+// const ERROR_NOT_FOUND = 404;
 const ERROR_DATA = 400;
 const ERROR_DEFAULT = 500;
 const ERROR_SUCCESS = 200;
 
-const getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
+  // populate для получения информацию об авторе истории,
+
     .populate('user')
-    .then((cards) => res.status(ERROR_SUCCESS).send (cardsData))
-    .catch((err) => res.status(ERROR_DEFAULT).send({ message: 'Ошибка по-умолчанию' } );
-}
+    .then((cards) => res.status(ERROR_SUCCESS).send({ data: cards }))
+    .catch(next);
+  // .catch((err) => res.status(ERROR_DEFAULT).send({ message: 'Ошибка по-умолчанию' } );
+};
 
-const deleteCard = (req, res) => {
-const { id} = req.params
+module.exports.createCard = (req, res, next) => {
+  const errors = validationResult(req);
+  const { name } = req.body.name;
+  const { link } = req.body.link;
+  const { owner } = req.user._id;
+    const { likes } = req.body.likes;
+   const { createdAt } = req.body.createdAt;
+  if (!errors.isEmpty()) {
+    return res.status(ERROR_DATA).json({ errors: errors.array() });
+  }
+  return Card.create({
+    name,
+    link,
+  },
+  { owner: req.user._id }, { new: true, returnNewDocument: true })
+    .then((card) => res.status(ERROR_SUCCESS).send({ data: card }))
+    .catch(next);
+  // .catch((err) => res.status(ERROR_DEFAULT).send({ message: `Ошибка` })))
+};
+
+
+module.exports.deleteCard = (req, res) => {
+Card.findById(req.user._id )
 return  Card.findById({})
-
-module.exports = { getCards };// несколько контроллеров
-
-cardsRouter.get('/', getCards);
-cardsRouter.post('/', createNewCard);
-cardsRouter.delete('/:id', deleteCard);
-cardsRouter.put('/:id/likes', likeCard);
-cardsRouter.delete('/:id/likes', dislikeCard); */
