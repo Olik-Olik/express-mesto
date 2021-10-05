@@ -10,10 +10,11 @@ const ERROR_DATA = 400;
 const ERROR_DEFAULT = 500;
 const ERROR_SUCCESS = 200;
 
-/*
-module.exports.getUsers = (req, res, next) => User.find({})
-  .then((users) => res.status(200).send({ data: users }))
-  .catch(next);
+module.exports.getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.status(200).send({ data: users }))
+    .catch(next);
+};
 
 /*
 /!*  User.find({}, (err, result) => {
@@ -25,7 +26,7 @@ module.exports.getUsers = (req, res, next) => User.find({})
   }
 }); *!/
 
-/!* const getUser = (req, res) => {
+/* const getUser = (req, res) => {
   const { id } = req.params;
   User.findById(id, (err, result) => {
     if (err) {
@@ -34,11 +35,18 @@ module.exports.getUsers = (req, res, next) => User.find({})
     } else {
       res.json(result);
     }
-  }); *!/
+  }); */
 
 module.exports.getUser = (req, res, next) => {
   const id = req.params;
   return User.findById(id)
+/*
+      .orFail(() => {
+      const error = new Error('Пользователь не найден');
+      err.name = 'UserNotFoundError'; // или любой другой признак, по которому в catch можно будет определить эту ошибку
+      throw error;
+    })
+*/
     .then((users) => res.status(ERROR_SUCCESS).send({ data: users }))
     .catch(next);
 };
@@ -60,8 +68,7 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
 };
-*/
-/*
+
 module.exports.updateUser = (req, res, next) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
@@ -74,17 +81,21 @@ module.exports.updateUser = (req, res, next) => {
   }, { new: true, returnNewDocument: true })
     .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
-};*/
-
-
+};
 
 module.exports.updateAvatar = (req, res, next) => {
-  const { avatar } = req.body;
-  console.log(`Find by id avatar ${avatar}`);
+  const newAvatar = req.body.avatar;
+  console.log(`Find by id avatar ${newAvatar}`);
   console.log(`Ava by id ${req.user._id}`);
   return User.findByIdAndUpdate({ _id: req.user._id },
-    { avatar },
+    { avatar: newAvatar },
     { new: true, returnNewDocument: true })
-    .then((updateAvatar) => res.status(ERROR_SUCCESS).send({ data: updateAvatar }))
+  /*    .orFail(() => {
+      const error = new Error('Пользователь не найден');
+      err.name = 'UserNotFoundError'; // или любой другой признак, по которому в catch можно будет определить эту ошибку
+      throw error;
+    }) */
+
+    .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
 };
