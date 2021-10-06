@@ -24,9 +24,6 @@ module.exports.createCard = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(ERROR_DATA).json({ errors: errors.array() });
   }
-  console.log(req.user._id);
-  console.log(newName);
-  console.log(newLink);
   return Card.create({
     owner: req.user._id,
     name: newName,
@@ -40,35 +37,11 @@ module.exports.createCard = (req, res, next) => {
   // .catch((err) => res.status(ERROR_DEFAULT).send({ message: `трампампам` })))
 };
 
-module.exports.updateCard = (req, res, next) => {
-  const errors = validationResult(req);
-  const newName = req.body.name;
-  const newLink = req.body.link;
-  /*
-   const { owner } = req.user._id;
-   const { likes } = req.body.likes;
-   const { createdAt } = req.body.createdAt;
-   */
-  if (!errors.isEmpty()) {
-    return res.status(ERROR_DATA).json({ errors: errors.array() });
-  }
-  return Card.create({
-    name: newName,
-    link: newLink,
-  },
-  { owner: req.user._id },
-  { new: true, returnNewDocument: true })
-    .catch(() => Error('Карточка не найдена'))
-    .then((card) => res.status(ERROR_SUCCESS).send({ data: card }))
-    .catch(next);
-  // .catch((err) => res.status(ERROR_DEFAULT).send({ message: `Ошибка` })))
-};
-
 module.exports.deleteCard = (req, res, next) => {
   // const { id } = req.params;
-  Card.findByIdAndDelete({ _id: req.user._id })
-    .orFail(() => Error('Карточка не найдена'))
-    .then((card) => res.status(ERROR_SUCCESS).send({ data: card }))
+  Card.findByIdAndDelete({ _id: req.params.id })
+    .orFail(() => res.status(ERROR_DATA).send({ message: 'Карточка не удалена.' }))
+    .then(() => res.status(ERROR_SUCCESS).send())
     .catch(next);
 };
 
@@ -77,7 +50,7 @@ module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate({ _id: req.user._id },
     { likes: req.user._id },
     { new: true, returnNewDocument: true })
-    .orFail(() => Error('Карточка не найдена'))
+    .orFail(() =>res.status(ERROR_DATA).send({ message: 'Карточка не лайкнута.' }))
     .then((likes) => res.status(ERROR_SUCCESS).send({ data: likes }))
     .catch(next);
 };
@@ -86,7 +59,7 @@ module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate({ _id: req.user._id },
     { likes: req.user._id },
     { new: true, returnNewDocument: true })
-    .orFail(() => Error('Карточка не найдена'))
+    .orFail(() => res.status(ERROR_DATA).send({ message: 'Карточка не дислайкнута.' }))
     .then((likes) => res.status(ERROR_SUCCESS).send({ data: likes }))
     .catch(next);
 };
