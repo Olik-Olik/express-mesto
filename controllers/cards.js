@@ -67,13 +67,13 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  const CardId = req.params._id;
+  const CardId = req.params.id;
   const UserId = req.user._id;
 
-  Card.findByIdAndUpdate((CardId),
+  Card.findByIdAndUpdate({ _id: CardId },
     { $pull: { likes: UserId } },
     { new: true, returnNewDocument: true })
-    .orFail(() => res.status(ERROR_DATA).send({ message: 'Карточка не дислайкнута.' }))
+    .orFail((err) => res.status(ERROR_DATA).send({ message: 'Карточка не дислайкнута.' }))
     .then((data) => res.status(ERROR_SUCCESS).send({ data }))
     .catch(next);
 };
