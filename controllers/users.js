@@ -57,7 +57,6 @@ module.exports.createUser = (req, res, next) => {
     about: newAbout,
     avatar: newAvatar,
   })
-  //  user.save();
     .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
 };

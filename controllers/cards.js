@@ -21,11 +21,6 @@ module.exports.createCard = (req, res, next) => {
   const errors = validationResult(req);
   const newName = req.body.name;
   const newLink = req.body.link;
-  /*
-  const { owner } = req.user._id;
-  const { likes } = req.body.likes;
-  const { createdAt } = req.body.createdAt;
-  */
   if (!errors.isEmpty()) {
     return res.status(ERROR_DATA).json({ errors: errors.array() });
   }
