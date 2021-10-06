@@ -12,29 +12,9 @@ const ERROR_SUCCESS = 200;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.status(ERROR_SUCCESS).send({ data: users }))
     .catch(next);
 };
-
-/*
-/!*  User.find({}, (err, result) => {
-  if (err) {
-    console.log(err);
-    res.status(500).send({ message: 'Ошибка по-умолчанию' });
-  } else {
-    res.json(result);
-  }
-});
- const getUser = (req, res) => {
-  const { id } = req.params;
-  User.findById(id, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по-умолчанию' });
-    } else {
-      res.json(result);
-    }
-  }); */
 
 module.exports.getUser = (req, res, next) => {
   const id = req.user._id;
@@ -71,7 +51,7 @@ module.exports.updateUser = (req, res, next) => {
     name: newName,
     about: newAbout,
   }, { new: true, returnNewDocument: true })
-    .orFail(() => Error('Карточка не найдена'))
+    .orFail((err) => res.status(ERROR_DATA).send({ message: `Пользователь не изменен: ${err}` }))
     .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
 };
@@ -83,7 +63,7 @@ module.exports.updateAvatar = (req, res, next) => {
   return User.findByIdAndUpdate({ _id: req.user._id },
     { avatar: newAvatar },
     { new: true, returnNewDocument: true })
-    .orFail(() => Error('Карточка не найдена'))
+    .orFail((err) => res.status(ERROR_DATA).send({ message: `Аватар не изменен: ${err}` }))
     .then((user) => res.status(ERROR_SUCCESS).send({ data: user }))
     .catch(next);
 };

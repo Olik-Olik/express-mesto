@@ -1,7 +1,7 @@
 const express = require('express');
 const { validationResult } = require('express-validator');
 
-const { Model, PopulateOptions } = require('mongoose');
+// const { Model, PopulateOptions } = require('mongoose');
 const Card = require('../models/card');
 
 // const ERROR_NOT_FOUND = 404;
@@ -11,7 +11,6 @@ const ERROR_SUCCESS = 200;
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-
     .populate('user')
     .then((cards) => res.status(ERROR_SUCCESS).send({ data: cards }))
     .catch(next);
@@ -41,19 +40,6 @@ module.exports.deleteCard = (req, res, next) => {
     .catch(next);
 };
 
-/*
-module.exports.likeCard = (req, res, next) => {
-  const CardId = req.params._id;
-  const UserId = req.user._id;
-  Card.findByIdAndUpdate(CardId)
-.populate(['likes']
- populate(path: string | any, select?: string | any, model?: string | Model<any, THelpers>, match?: any): this;
-populate(options: PopulateOptions | Array<PopulateOptions>): this;
-*/
-
-// найти по id
-// добавить, если нет $addToSet!!!!!!
-
 module.exports.likeCard = (req, res, next) => {
   const CardId = req.params.id;
   const UserId = req.user._id;
@@ -61,7 +47,7 @@ module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate({ _id: CardId },
     { $addToSet: { likes: UserId } },
     { new: true, returnNewDocument: true })
-    .orFail((err) => res.status(ERROR_DATA).send({ message: 'Карточка не лайкнута: ' + err }))
+    .orFail((err) => res.status(ERROR_DATA).send({ message: `Карточка не лайкнута: ${err}` }))
     .then((data) => res.status(ERROR_SUCCESS).send({ data }))
     .catch(next);
 };
@@ -73,7 +59,7 @@ module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate({ _id: CardId },
     { $pull: { likes: UserId } },
     { new: true, returnNewDocument: true })
-    .orFail((err) => res.status(ERROR_DATA).send({ message: 'Карточка не дислайкнута.' }))
+    .orFail((err) => res.status(ERROR_DATA).send({ message: `Карточка не дислайкнута: ${err}` }))
     .then((data) => res.status(ERROR_SUCCESS).send({ data }))
     .catch(next);
 };
