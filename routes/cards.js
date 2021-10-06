@@ -16,7 +16,7 @@ cardsRouter.delete('/cards/:id/likes', dislikeCard);
 */
 
 
-const createCard = require('../controllers/cards');
+const createCard = require('../controllers/cards').createCard;
 
 cardsRouter.post('/cards', createCard);
 
