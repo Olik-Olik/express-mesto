@@ -14,6 +14,14 @@ cardsRouter.put('/cards/:id/likes', likeCard);
 cardsRouter.delete('/cards/:id/likes', dislikeCard);
 
 */
+
+const dislikeCard = require('../controllers/cards').dislikeCard;
+const likeCard = require('../controllers/cards').likeCard;
+
+cardsRouter.put('/cards/:id/likes', likeCard);
+cardsRouter.delete('/cards/:id/likes', dislikeCard);
+
+
 const deleteCard = require('../controllers/cards').deleteCard;
 const createCard = require('../controllers/cards').createCard;
 
