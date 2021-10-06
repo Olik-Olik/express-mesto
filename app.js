@@ -6,14 +6,14 @@ const path = require('path');
 const routes = require('./routes/users');
 // const cardRoutes = require('./routes/cards');
 
-const PORT = 3099;
+const PORT = 3200;
 const app = express();
 const url = 'mongodb://localhost:27017/mestodb';
 mongoose.connect(url, { useNewUrlParser: true });
 // const bodyParser = require('body-parser');
 // const cards = require('./routes/cards');
 // const users = require('./routes/users');
-
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
   req.user = {
