@@ -1,11 +1,12 @@
 // const usersData = require('../users.json');//тестовый
-const express = require('express');
-const { validationResult } = require('express-validator');
+// const express = require('express');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { validationFuture } = require('express-validator');
 const User = require('../models/user');
 
-const app = express();
+// const app = express();
 
-//  const ERROR_NOT_FOUND = 404;
+// const ERROR_NOT_FOUND = 404;
 const ERROR_DATA = 400;
 // const ERROR_DEFAULT = 500;
 const ERROR_SUCCESS = 200;
@@ -28,7 +29,7 @@ module.exports.createUser = (req, res, next) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
   const newAvatar = req.body.avatar;
-  const errors = validationResult(req);
+  const errors = validationFuture(req);
   if (!errors.isEmpty()) {
     return res.status(ERROR_DATA).json({ errors: errors.array() });
   }
