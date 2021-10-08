@@ -6,11 +6,10 @@ const User = require('../models/user');
 
 // const app = express();
 // get post  400,500
-module.exports.getUsers = (req, res, next) => {
+module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` })
-      .catch(next));
+    .then((users) => res.status(200).send({ users }))
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
 // get post  400,500, 404
 module.exports.getUser = (req, res) => {
@@ -18,18 +17,11 @@ module.exports.getUser = (req, res) => {
   return User.findById(id)
     .then((user) => {
       if (user) {
-        res.status(200).send({ data: user });
+        res.status(200).send({ user });
       } else {
         res.status(404).send({ message: 'Пользователь по данному id отсутствует  в базе' });
       }
     })
-  /*
-    .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'Пользователь по данному id отсутствует  в базе' });
-      }
-      res.status(200).send({ data: user }); // присутствует
-    }) */
     .catch((err) => {
       // объект err содержит поле name, которое указывает тип ошибки
       if (err.name === 'CastError') {
@@ -37,15 +29,13 @@ module.exports.getUser = (req, res) => {
         //  пользователя, обновления аватара пользователя или профиля;
         res.status(400).send({ message: 'Невалидный id пользователя' });
         // карточка или пользователь не найден
-      } /* else if (err.statusCode === 404) {
-        res.status(404).send({ message: err.message });
-      } else { */
+      }
       // ошибка по-умолчанию иначе
       res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 // get post  400,500
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = (req, res) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
   const newAvatar = req.body.avatar;
@@ -58,22 +48,30 @@ module.exports.createUser = (req, res, next) => {
     about: newAbout,
     avatar: newAvatar,
   })
-    .then((user) => res.status(200).send({ data: user }))
+    .then(
+      (user) => {
+        if (!user) {
+          const error = new Error('Пользователь не создан');
+          error.statusCode = 404;
+          throw error;
+        }
+        res.status(200).send({ user });
+      }
+    )
     .catch((err) => {
       if (err.name === 'validationError') {
         res.status(400).send({ message: 'Невалидные данные' });
       }
+      if (err.statusCode === 404) {
+        res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
+      }
       res.status(500).send(err);
-    })
-    .catch(next);
+    });
 };
 // patch  404 ,500, 400
-module.exports.updateUser = (req, res, next) => {
+module.exports.updateUser = (req, res) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
-  console.log(`Find by id ${req.user._id}`);
-  console.log(`Find by id name ${newName}`);
-  console.log(`Find by id body ${req}`);
   return User.findByIdAndUpdate({ _id: req.user._id }, {
     name: newName,
     about: newAbout,
@@ -85,44 +83,46 @@ module.exports.updateUser = (req, res, next) => {
       throw error;
     })
   // иначе-все круто 200
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send({ user }))
 
     // иначе ловим  ошибки
     .catch((err) => {
       if (err.name === 'validationError') {
         res.status(400).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
       }
+      if (err.statusCode === 404) {
+        res.status(404).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
+      }
       //  все остальные
       res.status(500).send(err);
-    })
-    .catch(next);
+    });
 };
 
 // patch  404 ,500, 400
-module.exports.updateAvatar = (req, res, next) => {
+module.exports.updateAvatar = (req, res) => {
   const newAvatar = req.body.avatar;
-  console.log(`Find by id avatar ${newAvatar}`);
-  console.log(`Ava by id ${req.user._id}`);
+
   return User.findByIdAndUpdate({ _id: req.user._id },
     { avatar: newAvatar },
     { new: true, runValidators: true })
-
     // если не соответствует- то 404
     .orFail(() => {
-      const error = new Error('Пользователь по данному id отсутствует  в базе');
-      error.status = 404;
+      const error = new Error('Пользователь c данным id отсутствует  в базе');
+      error.statusCode = 404;
       throw error;
     })
     // иначе-все круто -200
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send({ user }))
 
     // иначе ловим  ошибки
     .catch((err) => {
       if (err.name === 'validationError') {
         res.status(400).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
       }
+      if (err.statusCode === 404) {
+        res.status(404).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
+      }
       //  все остальные
       res.status(500).send(err);
-    })
-    .catch(next);
+    });
 };

@@ -1,6 +1,6 @@
 // const express = require('express');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { validationError } = require('express-validator');
+// const { validationError } = require('express-validator');
 
 // const { Model, PopulateOptions } = require('mongoose');
 const Card = require('../models/card');
