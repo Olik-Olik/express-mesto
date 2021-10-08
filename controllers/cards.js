@@ -1,17 +1,10 @@
-// const express = require('express');
-// eslint-disable-next-line import/no-extraneous-dependencies
-// const { validationError } = require('express-validator');
-
-// const { Model, PopulateOptions } = require('mongoose');
 const Card = require('../models/card');
-// const User = require('../models/user');
 
-module.exports.getCards = (req, res, next) => {
+module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` })
-      .catch(next));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
 // post
 module.exports.createCard = (req, res) => {
@@ -31,14 +24,12 @@ module.exports.createCard = (req, res) => {
       }
       res.status(500).send({ message: `Произошла ошибка:  ${err}` });
     });
-  /* .catch(() => res.status(400).send({ message: 'Карточка не созданна.' })); */
 };
 
-module.exports.deleteCard = (req, res, next) => {
+module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete({ _id: req.params.id })
     .orFail(() => res.status(400).send({ message: 'Карточка не удалена.' }))
-    .then(() => res.status(200).send())
-    .catch(next);
+    .then(() => res.status(200).send());
 };
 
 module.exports.likeCard = (req, res) => {
@@ -62,9 +53,7 @@ module.exports.likeCard = (req, res) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Некорректные данные для лайка' });
         // карточка или пользователь не найден
-      } /* else if (err.statusCode === 404) { ВОТ ЭТО НЕВЕРНО, В catch 404 не ищет!
-        res.status(404).send({ message: 'Нет такого id для лайка' });
-      } else { */
+      }
       // ошибка по-умолчанию иначе
       res.status(500).send({ message: 'Произошла ошибка' });
     });
@@ -77,7 +66,6 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate({ _id: CardId },
     { $pull: { likes: UserId } },
     { new: true, runValidators: true })
-
     .then((card) => {
       if (card) {
         res.status(200).send({ data: card });
@@ -91,9 +79,7 @@ module.exports.dislikeCard = (req, res) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Некорректные данные для лайка' });
         // карточка или пользователь не найден
-      } /* else if (err.statusCode === 404) {
-        res.status(404).send({ message: 'Нет такого id для лайка' });
-      } else { */
+      }
       // ошибка по-умолчанию иначе
       res.status(500).send({ message: 'Произошла ошибка' });
     });
