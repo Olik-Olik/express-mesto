@@ -6,9 +6,8 @@ module.exports.getCards = (req, res) => {
     .then((cards) => res.status(200).send({ data: cards }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
-// post
+
 module.exports.createCard = (req, res) => {
-//  const errors = validationError(req);
   const newName = req.body.name;
   const newLink = req.body.link;
 

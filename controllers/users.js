@@ -1,6 +1,3 @@
-// const usersData = require('../users.json');//тестовый
-// const express = require('express');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { validationFuture } = require('express-validator');
 const User = require('../models/user');
 
