@@ -22,6 +22,9 @@ module.exports.createCard = (req, res) => {
       if (err.name === 'validationError') {
         res.status(400).send({ message: 'Невалидные данные' });
       }
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Невалидный id пользователя' });
+      }
       res.status(500).send({ message: `Произошла ошибка:  ${err}` });
     });
 };
