@@ -13,33 +13,29 @@ module.exports.getCards = (req, res, next) => {
     .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` })
       .catch(next));
 };
-
+// post
 module.exports.createCard = (req, res) => {
-  const errors = validationError(req);
+//  const errors = validationError(req);
   const newName = req.body.name;
   const newLink = req.body.link;
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+
   return Card.create({
     owner: req.user._id,
     name: newName,
     link: newLink,
   })
     .then((card) => res.status(200).send({ data: card }))
-
     .catch((err) => {
       if (err.name === 'validationError') {
         res.status(400).send({ message: 'Невалидные данные' });
       }
-      res.status(500).send(err);
+      res.status(500).send({ message: `Произошла ошибка:  ${err}` });
     });
   /* .catch(() => res.status(400).send({ message: 'Карточка не созданна.' })); */
 };
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndDelete({ _id: req.params.id })
-
     .orFail(() => res.status(400).send({ message: 'Карточка не удалена.' }))
     .then(() => res.status(200).send())
     .catch(next);
@@ -51,7 +47,7 @@ module.exports.likeCard = (req, res) => {
 
   Card.findByIdAndUpdate({ _id: CardId },
     { $addToSet: { likes: UserId } },
-    { new: true, returnNewDocument: true, runValidators: true })
+    { new: true, runValidators: true })
 
     .then((card) => {
       if (card) {
@@ -66,7 +62,7 @@ module.exports.likeCard = (req, res) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Некорректные данные для лайка' });
         // карточка или пользователь не найден
-      } /* else if (err.statusCode === 404) {
+      } /* else if (err.statusCode === 404) { ВОТ ЭТО НЕВЕРНО, В catch 404 не ищет!
         res.status(404).send({ message: 'Нет такого id для лайка' });
       } else { */
       // ошибка по-умолчанию иначе
@@ -80,9 +76,8 @@ module.exports.dislikeCard = (req, res) => {
 
   Card.findByIdAndUpdate({ _id: CardId },
     { $pull: { likes: UserId } },
-    { new: true, returnNewDocument: true, runValidators: true })
+    { new: true, runValidators: true })
 
-  //  ловим, возвращаем - Ура, 200 ошибка
     .then((card) => {
       if (card) {
         res.status(200).send({ data: card });

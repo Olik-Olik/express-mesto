@@ -77,7 +77,7 @@ module.exports.updateUser = (req, res, next) => {
   return User.findByIdAndUpdate({ _id: req.user._id }, {
     name: newName,
     about: newAbout,
-  }, { new: true, returnNewDocument: true, runValidators: true })
+  }, { new: true, runValidators: true })
   // если не соответствует- то 404
     .orFail(() => {
       const error = new Error('Пользователь по данному id отсутствует  в базе');
@@ -105,7 +105,7 @@ module.exports.updateAvatar = (req, res, next) => {
   console.log(`Ava by id ${req.user._id}`);
   return User.findByIdAndUpdate({ _id: req.user._id },
     { avatar: newAvatar },
-    { new: true, returnNewDocument: true, runValidators: true })
+    { new: true, runValidators: true })
 
     // если не соответствует- то 404
     .orFail(() => {
