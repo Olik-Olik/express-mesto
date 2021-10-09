@@ -56,7 +56,7 @@ module.exports.createUser = (req, res) => {
       },
     )
     .catch((err) => {
-      if (err.name === 'validationError') {
+      if (err.name === 'ValidatorError') {
         res.status(400).send({ message: 'Невалидные данные' });
       }
       if (err.statusCode === 404) {
@@ -84,7 +84,7 @@ module.exports.updateUser = (req, res) => {
 
     // иначе ловим  ошибки
     .catch((err) => {
-      if (err.name === 'validationError') {
+      if (err.name === 'ValidatorError') {
         res.status(400).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
       }
       if (err.name === 'CastError') {
@@ -116,7 +116,7 @@ module.exports.updateAvatar = (req, res) => {
 
     // иначе ловим  ошибки
     .catch((err) => {
-      if (err.name === 'validationError') {
+      if (err.name === 'ValidatorError') {
         res.status(400).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
       }
       if (err.name === 'CastError') {

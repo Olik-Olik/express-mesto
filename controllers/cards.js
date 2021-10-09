@@ -18,7 +18,7 @@ module.exports.createCard = (req, res) => {
   })
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'validationError') {
+      if (err.name === 'ValidatorError') {
         res.status(400).send({ message: 'Невалидные данные' });
       }
       if (err.name === 'CastError') {
