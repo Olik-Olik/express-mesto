@@ -10,17 +10,13 @@ module.exports.getCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const newName = req.body.name;
   const newLink = req.body.link;
-
   return Card.create({
     owner: req.user._id,
     name: newName,
     link: newLink,
   })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidatorError') {
-        res.status(400).send({ message: 'Невалидные данные' });
-      }
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Невалидный id пользователя' });
       }
@@ -30,8 +26,21 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete({ _id: req.params.id })
-    .orFail(() => res.status(400).send({ message: 'Карточка не удалена.' }))
-    .then(() => res.status(200).send());
+    .orFail(() => {
+      const error = new Error('Нет карточки с таким  id   в базе');
+      error.statusCode = 404;
+      throw error;
+    })
+    .then(() => res.status(200).send({ message: 'Карточка удалена.' }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректные данные id карты ' });
+      } else if (err.statusCode === 404) {
+        res.status(404).send({ message: `Невалидные данные: ${err}` });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -41,7 +50,6 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate({ _id: CardId },
     { $addToSet: { likes: UserId } },
     { new: true, runValidators: true })
-
     .then((card) => {
       if (card) {
         res.status(200).send({ data: card });
@@ -49,15 +57,12 @@ module.exports.likeCard = (req, res) => {
         res.status(404).send({ message: 'Нет такого id для лайка' });
       }
     })
-    // но мы ставим catch, ищем кастомные ошибки
     .catch((err) => {
-      // объект err содержит поле name, которое указывает тип ошибки
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Некорректные данные для лайка' });
-        // карточка или пользователь не найден
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      // ошибка по-умолчанию иначе
-      res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -75,14 +80,11 @@ module.exports.dislikeCard = (req, res) => {
         res.status(404).send({ message: 'Нет такого id для лайка' });
       }
     })
-  // но мы ставим catch, ищем кастомные ошибки
     .catch((err) => {
-      // объект err содержит поле name, которое указывает тип ошибки
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Некорректные данные для лайка' });
-        // карточка или пользователь не найден
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      // ошибка по-умолчанию иначе
-      res.status(500).send({ message: 'Произошла ошибка' });
     });
 };

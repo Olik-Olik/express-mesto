@@ -2,10 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
+const router = require('express').Router(); // корневой роутер
 const routes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 
-const PORT = 3100;
+const PORT = 3602;
 const app = express();
 const url = 'mongodb://localhost:27017/mestodb';
 mongoose.connect(url, { useNewUrlParser: true });
@@ -17,9 +18,10 @@ app.use((req, res, next) => {
   };
   next();
 });
-app.use(cardRoutes);
+
 app.use(express.json());
 app.use(routes);
+app.use(cardRoutes);
 app.use((req, res) => {
   res.status(404).send({ message: 'Нет такой страницЫ' });
 });
@@ -27,3 +29,4 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`Express is Working in console ${PORT}`);
 });
+module.exports = { router };
