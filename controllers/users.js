@@ -7,8 +7,8 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUser = (req, res) => {
-  const id = req.params._id;
-  return User.findById(id)
+  const userId = req.params.id;
+  return User.findById(userId)
     .then((user) => {
       if (user) {
         res.status(200).send({ user });

@@ -3,7 +3,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('user')
-    .then((cards) => res.status(200).send({ data: cards }))
+    .then((cards) => res.status(200).send({ cards }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
 
@@ -44,15 +44,15 @@ module.exports.deleteCard = (req, res) => {
 };
 
 module.exports.likeCard = (req, res) => {
-  const CardId = req.params.id;
-  const UserId = req.user._id;
+  const cardId = req.params.id;
+  const userId = req.user._id;
 
-  Card.findByIdAndUpdate({ _id: CardId },
-    { $addToSet: { likes: UserId } },
+  Card.findByIdAndUpdate({ _id: cardId },
+    { $addToSet: { likes: userId } },
     { new: true, runValidators: true })
     .then((card) => {
       if (card) {
-        res.status(200).send({ data: card });
+        res.status(200).send({ card });
       } else {
         res.status(404).send({ message: 'Нет такого id для лайка' });
       }
@@ -75,7 +75,7 @@ module.exports.dislikeCard = (req, res) => {
     { new: true, runValidators: true })
     .then((card) => {
       if (card) {
-        res.status(200).send({ data: card });
+        res.status(200).send({ card });
       } else {
         res.status(404).send({ message: 'Нет такого id для лайка' });
       }
