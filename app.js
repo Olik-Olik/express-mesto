@@ -5,9 +5,10 @@ const cookieParser = require('cookie-parser');
 const router = require('express').Router(); // корневой роутер
 const routes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
-const { createUser, login } = require('./controllers/users');
+require('./middlewares/auth');
 
-require('dotenv').config;
+const { createUser, login } = require('./controllers/users');
+// const User = require('./models/user');
 
 const PORT = 3621;
 const app = express();
@@ -18,23 +19,28 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 // app.use(express.json());
-// app.use(express.urlencoded());// Строка в кодировке URL,
-// как правило, не является допустимой строкой JSON.
+// app.use(express.urlencoded());
+
 app.use(bodyParser.json());
-app.use(cookieParser());
-app.use('/', auth, users);
-// app.use('/', auth, cards);
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.use(auth); // все роуты ниже этой строки будут защищены
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
+
 // анализирует только тела входа перед обработчиком и смотреть если будет нужный тип.
 // extended: true на все типы
 // преобразует текстовый ввод JSON в переменные, доступные для JS в разделе req.body
 
+/*
 app.use((req, res, next) => {
   req.user = {
     _id: '6158c018363c506cb10e4747',
   };
   next();
 });
+*/
 
 app.use(routes);
 app.use(cardRoutes);

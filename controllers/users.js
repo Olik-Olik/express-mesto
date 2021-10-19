@@ -1,9 +1,8 @@
 const bcrypt = require('bcryptjs');
-// const isJWT = require('validator/es/lib/isJWT');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-// const validator = require("./validator"); // or where your file is located
+// const validator = require("./validator"); /
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -30,14 +29,7 @@ module.exports.getUser = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
-  /*
- const newName = req.body.name;
-  const newAbout = req.body.about;
-  const newAvatar = req.body.avatar;
-  const newEmail = req.body.email;
-  const newPassword = req.body.password;
-  */
+module.exports.createUser = (req, res, next) => {
   //  хешируем пароль
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
@@ -54,6 +46,11 @@ module.exports.createUser = (req, res) => {
       password: newPassword,
       // заносим в базу */
     })
+      .catch((err) => {
+        if (err.name === 'MongoError' && err.code === 11000) {
+          res.status(409).send({ message: 'Такой email в базе есть , придумывай другой' });
+        } else next();
+      })
       .then(
         (user) => {
           if (!user) {
@@ -107,25 +104,26 @@ module.exports.login = (req, res) => {
   const { email } = req.body;
   const { password } = req.body;
   User.findOne({ email })
+    // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
         Promise.reject(new Error('Неправильная почта, Потом исправить  или пароль')); // отклоненный
       }
       const matched = bcrypt.compare(password, user.password);
       if (!matched) {
+        // eslint-disable-next-line max-len
         return Promise.reject(new Error('Неправильный пароль, это пока для разработки потом или почта'));
       }
+      // return User.findUserByCredentials(email, password)
+      //   .then((user) => {
       const token = jwt.sign({ _id: user._id },
-      //  'some-secret-key', { expiresIn: 3600 * 24 * 7 });
-        'super-strong-secret', { expiresIn: '7d' });
-
-      return res.status(201).send({ token });
+      //  'some-secret-key', { expiresIn: 3600000 * 24 * 7 });
+        'some-secret-key',
+        { expiresIn: '7d' });
+      res.status(201).send({ token });
     })
-  // дать юзеру права
-
     .catch((err) => {
-      // 'Необходима авторизация'
-      res.status(401).send({ message: err.message });
+      res.status(401).send({ message: `Необходима авторизация  ${err}` });
     });
 };
 
