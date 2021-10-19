@@ -1,4 +1,9 @@
+const bcrypt = require('bcryptjs');
+// const isJWT = require('validator/es/lib/isJWT');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+// const validator = require("./validator"); // or where your file is located
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -24,35 +29,50 @@ module.exports.getUser = (req, res) => {
       }
     });
 };
+
 module.exports.createUser = (req, res) => {
-  const newName = req.body.name;
+  /*
+ const newName = req.body.name;
   const newAbout = req.body.about;
   const newAvatar = req.body.avatar;
-
-  return User.create({
-    name: newName,
-    about: newAbout,
-    avatar: newAvatar,
-  })
-    .then(
-      (user) => {
-        if (!user) {
-          const error = new Error('Пользователь не создан');
-          error.statusCode = 404;
-          throw error;
+  const newEmail = req.body.email;
+  const newPassword = req.body.password;
+  */
+  //  хешируем пароль
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+      email: req.body.email,
+      password: hash,
+      /*
+     name: newName,
+      about: newAbout,
+      avatar: newAvatar,
+      email: newEmail,
+      password: newPassword,
+      // заносим в базу */
+    })
+      .then(
+        (user) => {
+          if (!user) {
+            const error = new Error('Пользователь не создан');
+            error.statusCode = 404;
+            throw error;
+          }
+          res.status(201).send({ user });
+        },
+      )
+      .catch((err) => {
+        if (err.name === 'ValidatorError') {
+          res.status(400).send({ message: 'Невалидные данные Синтаксическая ошибка' });
+        } else if (err.statusCode === 404) {
+          res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
+        } else {
+          res.status(500).send({ message: 'Произошла ошибка' });
         }
-        res.status(200).send({ user });
-      },
-    )
-    .catch((err) => {
-      if (err.name === 'ValidatorError') {
-        res.status(400).send({ message: 'Невалидные данные' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
-      }
-    });
+      }));
 };
 
 module.exports.updateUser = (req, res) => {
@@ -82,6 +102,34 @@ module.exports.updateUser = (req, res) => {
       }
     });
 };
+
+module.exports.login = (req, res) => {
+  const { email } = req.body;
+  const { password } = req.body;
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        Promise.reject(new Error('Неправильная почта, Потом исправить  или пароль')); // отклоненный
+      }
+      const matched = bcrypt.compare(password, user.password);
+      if (!matched) {
+        return Promise.reject(new Error('Неправильный пароль, это пока для разработки потом или почта'));
+      }
+      const token = jwt.sign({ _id: user._id },
+      //  'some-secret-key', { expiresIn: 3600 * 24 * 7 });
+        'super-strong-secret', { expiresIn: '7d' });
+
+      return res.status(201).send({ token });
+    })
+  // дать юзеру права
+
+    .catch((err) => {
+      // 'Необходима авторизация'
+      res.status(401).send({ message: err.message });
+    });
+};
+
+// переходим по роуту логин и пароль есть
 
 module.exports.updateAvatar = (req, res) => {
   const newAvatar = req.body.avatar;
