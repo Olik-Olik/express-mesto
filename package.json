@@ -7,6 +7,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "celebrate": "^15.0.0",
     "cookie-parser": "^1.4.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
@@ -18,7 +19,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint .",
-      "prod": "cross-env , NODE_ENV=production webpack"
+    "prod": "cross-env , NODE_ENV=production webpack"
   },
   "homepage": "https://github.com/Olik-Olik/express-mesto",
   "devDependencies": {

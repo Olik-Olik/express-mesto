@@ -2,31 +2,49 @@ const bcrypt = require('bcryptjs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-// const validator = require("./validator"); /
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const UnAuthorizedError = require('../errors/UnAuthorizedError');
+const Card = require('../models/card');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send({ users }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
+    .catch(next);
+  // .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   const userId = req.params.id;
   return User.findById(userId)
     .then((user) => {
       if (user) {
-        res.status(200).send({ user });
-      } else {
-        res.status(404).send({ message: 'Пользователь по данному id отсутствует  в базе' });
+        // res.status(200).send({ user });
+        res.send(user);
       }
+      throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
+
+      // else {res.status(404).send({ message: 'Пользователь по данному id отсутствует  в базе' });}
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Невалидный id пользователя' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        throw new NotFoundError('Невалидный id пользователя');
+      //  res.status(400).send({ message: 'Невалидный id пользователя' });
       }
+      next(err);
+      // .catch(err => next(err));
+      //      res.status(500).send({ message: 'Произошла ошибка' });
     });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  const userId = req.params.id;
+  return User.findById(userId)
+    .orFail(() => {
+      throw new NotFoundError({ message: 'Пользователь по данному id отсутствует  в базе' });
+    })
+    .then((user) => { res.send(user); })
+    .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -49,7 +67,7 @@ module.exports.createUser = (req, res, next) => {
       .catch((err) => {
         if (err.name === 'MongoError' && err.code === 11000) {
           res.status(409).send({ message: 'Такой email в базе есть , придумывай другой' });
-        } else next();
+        } else next(err);
       })
       .then(
         (user) => {
@@ -101,15 +119,15 @@ module.exports.updateUser = (req, res) => {
 };
 
 module.exports.login = (req, res) => {
-  const { email } = req.body;
-  const { password } = req.body;
-  User.findOne({ email })
+  const user_email = req.body.email;
+  const user_password = req.body.password;
+  User.findOne({ email: user_email })
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        Promise.reject(new Error('Неправильная почта, Потом исправить  или пароль')); // отклоненный
+        return Promise.reject(new Error('Неправильная почта, Потом исправить  или пароль')); // отклоненный
       }
-      const matched = bcrypt.compare(password, user.password);
+      const matched = bcrypt.compare(user_password, user.password);
       if (!matched) {
         // eslint-disable-next-line max-len
         return Promise.reject(new Error('Неправильный пароль, это пока для разработки потом или почта'));
