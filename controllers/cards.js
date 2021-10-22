@@ -12,11 +12,7 @@ module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.status(200).send({ cards }))
-    .catch(() => {
-      throw new InternalServerError({ message: 'Произошла ошибка' });
-    })
-    // .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }))
-    .catch((err) => next(err));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err.message}` }));
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -30,17 +26,10 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-      //  res.status(400).send({ message: 'Невалидный id пользователя' });
-        throw new BadRequestError({ message: 'Невалидный id пользователя' });
+        throw new BadRequestError('Невалидный id пользователя');
       }
-      // eslint-disable-next-line no-lone-blocks
-      {
-        //throw new InternalServerError({ message: 'Произошла ошибка' });
-      }
-      //next(err);
-      res.status(500).send({ message: `Произошла ошибка:  ${err}` });
-    })
-    //.catch((err) => next(err));
+      res.status(500).send({ message: `Произошла ошибка:  ${err.message}` });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -48,7 +37,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findById({ _id: cardId })
     //  выдает ошибку, если ни один документ не соответствует id
     .orFail(() => {
-      throw new NotFoundError({ message: 'Нет карточки с таким id в базе' });
+      throw new NotFoundError('Нет карточки с таким id в базе');
     })
     .then((card) => {
       // если собственник идентичен текущему юзеру
@@ -68,21 +57,8 @@ module.exports.deleteCard = (req, res) => {
         res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
     });
-  ;
 };
-/* .then(() => res.status(200).send({ message: 'Карточка удалена.' }))
-      .catch((err) => {
-        if (err.name === 'CastError') {
-          res.status(400).send({ message: 'Некорректные данные id карты ' });
-        } else if (err.statusCode === 404) {
-          res.status(404).send({ message: `Невалидные данные: ${err}` });
-        } else {
-          res.status(500).send({ message: 'Произошла ошибка' });
-        }
-      });
-  }
-};
-*/
+
 module.exports.likeCard = (req, res) => {
   const cardId = req.params.id;
   const userId = req.user._id;
@@ -94,21 +70,17 @@ module.exports.likeCard = (req, res) => {
       if (card) {
         res.status(200).send({ card });
       } else {
-        throw new NotFoundError({ message: 'Нет такого id для лайка' });
-        // res.status(404).send({ message: 'Нет такого id для лайка' });
+        throw new NotFoundError('Нет такого id для лайка');
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Некорректные данные для лайка' });
-        // res.status(400).send({ message: 'Некорректные данные для лайка' });
+        res.status(400).send({ message: 'Некорректные данные для лайка' });
       } else {
-        throw new InternalServerError({ message: 'Произошла ошибка' });
-        //   next(err);
-        // res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
-  // .catch(err => next(err)); ;
+
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -123,17 +95,13 @@ module.exports.dislikeCard = (req, res) => {
         res.status(200).send({ card });
       } else {
         throw new NotFoundError({ message: 'Нет такого id для лайка' });
-      //  res.status(404).send({ message: 'Нет такого id для лайка' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Некорректные данные для лайка' });
-        // res.status(400).send({ message: 'Некорректные данные для лайка' });
+        res.status(400).send({ message: 'Некорректные данные для лайка' });
       } else {
-        throw new InternalServerError({ message: 'Произошла ошибка' });
-        // res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
-  // .catch(err => next(err));
 };
