@@ -1,12 +1,12 @@
-// errors/NotFoundError.js 404
+// 409 ConflictError
 
-class NotFoundError extends Error {
+class ConflictError extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = 404;
+    this.statusCode = 409;
   }
 }
-module.exports = NotFoundError;
+module.exports = ConflictError;
 
 // 400, когда с запросом что-то не так;
 // 401, когда что-то не так при аутентификации или авторизации;

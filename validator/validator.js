@@ -1,8 +1,11 @@
 const { celebrate, Joi } = require('celebrate');
-const validators = require('validator');// для проверки url посмотреть
+require('validator');
+const linkValidate = require('validator/lib/isURL');
 
-const linkValidate = validators.isURL({
-  message: 'Must be a Valid URL',
+/* const linkValidator (link) => {if linkValidator.Url(link) */
+/* const linkValidate = async () => await fetch(url) */
+
+const linkValidator = linkValidate.isUrl({
   protocols: ['http', 'https', 'ftp'],
   require_tld: true,
   require_protocol: true,
@@ -30,38 +33,29 @@ const updateUserValidate = celebrate({
   }),
 });
 
-/*
 const updateAvatarValidate = celebrate({
   body: Joi.object().keys({
     // url!!! посмотреть как
-    //   avatar: Joi.string().required().(linkValidation)
+    avatar: Joi.string().required().isUrl(),
 
   }),
 });
 
 const cardValidate = celebrate({
   body: Joi.object().keys({
-    link: Joi.string().required().(linkValidation),
+    link: linkValidator,
     name: Joi.string().required().min(2).max(30),
   }),
 });
-
-const idValidate = celebrate({
-  body: Joi.object().keys({
-    _id: Joi.string().required(),
-
-  }),
-});
-*/
 
 module.exports = {
   userValidate,
   loginValidate,
   updateUserValidate,
-  //  updateAvatarValidate,
+  updateAvatarValidate,
   //  createCardValidate,
-  //  idValidate,
-  linkValidate,
+  linkValidator,
+  cardValidate,
 };
 
 /*

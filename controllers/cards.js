@@ -1,16 +1,21 @@
 const Card = require('../models/card');
-const NotFoundError = require('../errors/NotFoundError');
-const BadRequestError = require('../errors/BadRequestError');
-const UnAuthorizedError = require('../errors/UnAuthorizedError');
+const NotFoundError = require('../errors/NotFoundError');// 404 например, когда мы не нашли ресурс по переданному _id;
+const BadRequestError = require('../errors/BadRequestError');// 400 когда с запросом что-то не так; eslint-disable-next-line max-len
+// const UnAuthorizedError = require('../errors/UnAuthorizedError');
+// 401 когда что-то не так при аутентификации или авторизации;
+// const ConflictError = require('../errors/ConflictError');// 409 Conflict
+// const User = require('../models/user');
+const InternalServerError = require('../errors/InternalServerError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.status(200).send({ cards }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }))
+    .catch((err) => next(err));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const newName = req.body.name;
   const newLink = req.body.link;
   return Card.create({
@@ -21,28 +26,38 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Невалидный id пользователя' });
+      //  res.status(400).send({ message: 'Невалидный id пользователя' });
+        throw new BadRequestError({ message: 'Невалидный id пользователя' });
       }
-      res.status(500).send({ message: `Произошла ошибка:  ${err}` });
-    });
+      // eslint-disable-next-line no-lone-blocks
+      {
+        throw new InternalServerError({ message: 'Произошла ошибка' });
+      }
+      // next(err);
+      //  res.status(500).send({ message: `Произошла ошибка:  ${err}` });
+    })
+    .catch((err) => next(err));
 };
 
 module.exports.deleteCard = (req, res) => {
-  const card = Card.findById({ _id: req.userId })
-  //  Card.findByIdAndDelete({ _id: req.params.id })
-    //  выдает ошибку, если ни один документ не соответствует заданному фильтру
+  Card.findById({ _id: req.userId })
+    //  выдает ошибку, если ни один документ не соответствует id
     .orFail(() => {
-    //  const error = new Error('Нет карточки с таким  id   в базе');
-    //  error.statusCode = 404;
       throw new NotFoundError({ message: 'Нет карточки с таким  id   в базе' });
+    })
+    .then((card) => {
+      // если собственник идентичен текущему юзеру
+      if (card.owner.toString() === req.params._id) {
+        Card.deleteOne({ _id: req.userId })
+          .then(res.send({ message: 'Карточка удалена.' }));
+        throw new Error('Чужие карточки не удаляют');
+      }
+      // eslint-disable-next-line no-lone-blocks
+      {
+        throw new InternalServerError({ message: 'Произошла ошибка' });
+      }
     });
-  if (card.owner.toString() === req.user._id) {
-    Card.deleteOne({ _id: card._id })
-      .then(res.send({ message: 'Карточка удалена.' }));
-    throw new Error('Чужие карточки не удаляют');
-  }
 };
-
 /* .then(() => res.status(200).send({ message: 'Карточка удалена.' }))
       .catch((err) => {
         if (err.name === 'CastError') {
@@ -67,16 +82,21 @@ module.exports.likeCard = (req, res) => {
       if (card) {
         res.status(200).send({ card });
       } else {
-        res.status(404).send({ message: 'Нет такого id для лайка' });
+        throw new NotFoundError({ message: 'Нет такого id для лайка' });
+        // res.status(404).send({ message: 'Нет такого id для лайка' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные для лайка' });
+        throw new BadRequestError({ message: 'Некорректные данные для лайка' });
+        // res.status(400).send({ message: 'Некорректные данные для лайка' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        throw new InternalServerError({ message: 'Произошла ошибка' });
+        //   next(err);
+        // res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
+  // .catch(err => next(err)); ;
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -90,14 +110,18 @@ module.exports.dislikeCard = (req, res) => {
       if (card) {
         res.status(200).send({ card });
       } else {
-        res.status(404).send({ message: 'Нет такого id для лайка' });
+        throw new NotFoundError({ message: 'Нет такого id для лайка' });
+      //  res.status(404).send({ message: 'Нет такого id для лайка' });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные для лайка' });
+        throw new BadRequestError({ message: 'Некорректные данные для лайка' });
+        // res.status(400).send({ message: 'Некорректные данные для лайка' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        throw new InternalServerError({ message: 'Произошла ошибка' });
+        // res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
+  // .catch(err => next(err)); ;
 };
