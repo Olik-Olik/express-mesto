@@ -9,14 +9,10 @@ const ConflictError = require('../errors/ConflictError');// 409
 const InternalServerError = require('../errors/InternalServerError');// 500
 // const Card = require('../models/card');
 
-module.exports.getUsers = (req, res, next) => {
+module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send({ users }))
-    .catch(() => {
-      throw new InternalServerError({ message: 'Произошла ошибка' });
-    })
-  // .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
-    .catch(next);
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -24,26 +20,16 @@ module.exports.getUser = (req, res, next) => {
   return User.findById(userId)
     .then((user) => {
       if (user) {
-        // res.status(200).send({ user });
-        res.send(user);
+        res.status(200).send({ user });
       }
       throw new NotFoundError({ message: 'Пользователь по данному id отсутствует  в базе' });
-
-      // else {res.status(404).send({ message: 'Пользователь по данному id отсутствует  в базе' });}
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Невалидный id пользователя');
-      //  res.status(400).send({ message: 'Невалидный id пользователя' });
+        res.status(400).send({ message: 'Невалидный id пользователя' });
       }
-      // next(err);
-      // .catch(err => next(err));
-      //      res.status(500).send({ message: 'Произошла ошибка' });
-    })
-    .catch(() => {
-      throw new InternalServerError({ message: 'Произошла ошибка' });
-    })
-    .catch((err) => next(err));
+      res.status(500).send({ message: 'Произошла ошибка' });
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
@@ -54,9 +40,9 @@ module.exports.getCurrentUser = (req, res, next) => {
     })
     .then((user) => { res.send(user); })
     .catch(() => {
-      throw new InternalServerError({ message: 'Произошла ошибка' });
-    })
-    .catch((err) => next(err));
+      res.status(500).send({ message: 'Произошла ошибка' });
+
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -68,50 +54,33 @@ module.exports.createUser = (req, res, next) => {
       avatar: req.body.avatar,
       email: req.body.email,
       password: hash,
-      /*
-     name: newName,
-      about: newAbout,
-      avatar: newAvatar,
-      email: newEmail,
-      password: newPassword,
-      // заносим в базу */
     })
       .catch((err) => {
         if (err.name === 'MongoError' && err.code === 11000) {
           throw new ConflictError({ message: 'Такой email в базе есть , придумывай другой ' });
           // eslint-disable-next-line brace-style
         }
-        //  res.status(409).send({ message: 'Такой email в базе есть , придумывай другой' });
         else {
           throw new InternalServerError({ message: 'Произошла ошибка' });
         }
-        // next(err);
       })
       .then(
         (user) => {
           if (!user) {
             throw new NotFoundError({ message: 'Пользователь не создан' });
-          //  const error = new Error('Пользователь не создан');
-          //  error.statusCode = 404;
-          // throw error;
           }
           res.status(201).send({ user });
         },
       )
       .catch((err) => {
         if (err.name === 'ValidatorError') {
-          throw new BadRequestError({ message: 'Невалидные данные Синтаксическая ошибка' });
-        // res.status(400).send({ message: 'Невалидные данные Синтаксическая ошибка' });
+         res.status(400).send({ message: 'Невалидные данные Синтаксическая ошибка' });
         } else if (err.statusCode === 404) {
-          throw new NotFoundError({ message: `Пользователь не создан, Невалидные данные: ${err}` });
-          // res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
+           res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
         } else {
-          throw new InternalServerError({ message: 'Произошла ошибка' });
-          // next(err);
-          // res.status(500).send({ message: 'Произошла ошибка' });
+           res.status(500).send({ message: 'Произошла ошибка' });
         }
-      }))
-    .catch((err) => next(err));
+      }));
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -123,30 +92,21 @@ module.exports.updateUser = (req, res, next) => {
   }, { new: true, runValidators: true })
     .orFail(() => {
       throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
-      // const error = new Error('Пользователь по данному id отсутствует  в базе');
-      // error.statusCode = 404;
-      // throw error;
     })
     .then((user) => res.status(200).send({ user }))
 
     .catch((err) => {
       if (err.name === 'ValidatorError') {
-        throw new BadRequestError({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
-        // res.status(400).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
+         res.status(400).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
       }
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Невалидный id пользователя' });
-        // res.status(400).send({ message: 'Невалидный id пользователя' });
+         res.status(400).send({ message: 'Невалидный id пользователя' });
       } else if (err.statusCode === 404) {
-        throw new NotFoundError({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
-        // res.status(404).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
+        res.status(404).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
       } else {
-        throw new InternalServerError({ message: 'Произошла ошибка' });
-      //  next(err);
-        // res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-    })
-    .catch((err) => next(err));
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -163,22 +123,15 @@ module.exports.login = (req, res, next) => {
         // eslint-disable-next-line max-len
         return Promise.reject(new Error('Неправильный пароль или почта'));
       }
-      // return User.findUserByCredentials(email, password)
-      //   .then((user) => {
       const token = jwt.sign({ _id: user._id },
-      //  'some-secret-key', { expiresIn: 3600000 * 24 * 7 });
         'some-secret-key',
         { expiresIn: '7d' });
       res.status(201).send({ token });
     })
     .catch((err) => {
-      throw new UnAuthorizedError({ message: `Необходима авторизация  ${err}` });
-      // res.status(401).send({ message: `Необходима авторизация  ${err}` });
-    })
-    .catch((err) => next(err));
+      res.status(401).send({ message: `Необходима авторизация  ${err}` });
+    });
 };
-
-// переходим по роуту логин и пароль есть
 
 module.exports.updateAvatar = (req, res, next) => {
   const newAvatar = req.body.avatar;
@@ -188,29 +141,20 @@ module.exports.updateAvatar = (req, res, next) => {
     { new: true, runValidators: true })
     // если не соответствует- то 404
     .orFail(() => {
-      throw new NotFoundError({ message: 'Пользователь c данным id отсутствует  в базе' });
-      // const error = new Error('Пользователь c данным id отсутствует  в базе');
-      // error.statusCode = 404;
-      // throw error;
+      throw new NotFoundError('Пользователь c данным id отсутствует  в базе');
     })
     .then((user) => res.status(200).send({ user }))
 
     .catch((err) => {
       if (err.name === 'ValidatorError') {
-        throw new BadRequestError({ message: `Аватар не изменен, Невалидные данные: ${err}` });
-        // res.status(400).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
+        res.status(400).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
       }
       if (err.name === 'CastError') {
-        throw new BadRequestError({ message: 'Невалидный id пользователя' });
-        //  res.status(400).send({ message: 'Невалидный id пользователя' });
+        res.status(400).send({ message: 'Невалидный id пользователя' });
       } else if (err.statusCode === 404) {
-        throw new NotFoundError({ message: `Аватар не изменен, Невалидные данные: ${err}` });
-        // res.status(404).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
+        res.status(404).send({ message: `Аватар не изменен, Невалидные данные: ${err}` });
       } else {
-        throw new InternalServerError({ message: 'Произошла ошибка' });
-        // next(err);
-        //  res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-    })
-    .catch((err) => next(err));
+    });
 };
