@@ -6,6 +6,7 @@ const BadRequestError = require('../errors/BadRequestError');// 400 когда �
 // const ConflictError = require('../errors/ConflictError');// 409 Conflict
 // const User = require('../models/user');
 const InternalServerError = require('../errors/InternalServerError');
+const {updateUserValidate} = require("../validator/validator");
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -43,23 +44,31 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findById({ _id: req.userId })
+  const cardId = req.params.id;
+  Card.findById({ _id: cardId })
     //  выдает ошибку, если ни один документ не соответствует id
     .orFail(() => {
-      throw new NotFoundError({ message: 'Нет карточки с таким  id   в базе' });
+      throw new NotFoundError({ message: 'Нет карточки с таким id в базе' });
     })
     .then((card) => {
       // если собственник идентичен текущему юзеру
-      if (card.owner.toString() === req.params._id) {
-        Card.deleteOne({ _id: req.userId })
-          .then(res.send({ message: 'Карточка удалена.' }));
-        throw new Error('Чужие карточки не удаляют');
+      console.log('owner id ' + card.owner.toString());
+      console.log('user  id ' + req.userId);
+      if (card.owner.toString() === req.userId) {
+        Card.deleteOne({ _id: cardId })
+          .then(() => res.status(200).send({ message: 'Карточка удалена.' }));
       }
-      // eslint-disable-next-line no-lone-blocks
-      {
-        throw new InternalServerError({ message: 'Произошла ошибка' });
+      throw new Error('Чужие карточки не удаляют');
+    }).catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректные данные id карты ' });
+      } else if (err.statusCode === 404) {
+        res.status(404).send({ message: `Невалидные данные: ${err.toString()}` });
+      } else {
+        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
       }
     });
+  ;
 };
 /* .then(() => res.status(200).send({ message: 'Карточка удалена.' }))
       .catch((err) => {

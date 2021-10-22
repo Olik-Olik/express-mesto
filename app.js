@@ -31,15 +31,18 @@ app.post('/signup', createUser, userValidate);
 app.use(auth);// все роуты ниже этой строки будут защищены
 app.use(routes);
 app.use(cardRoutes);
-app.use(() => {
-// res.status(404).send({ message: 'Нет такой страницЫ' });
-  throw new NotFoundError({ message: 'Нет такой страницЫ' });
+app.use((req, res) => {
+  res.status(404).send({ message: 'Нет такой страницЫ' });
+  //throw new NotFoundError({ message: 'Нет такой страницЫ' });
 });
-app.use((err, req, res, next) => {
-  if (!err.name === 'ValidatorError' || !err.name === 'CastError' || !err.statusCode === 404 || !err.statusCode === 409) throw new InternalServerError({ message: 'Произошла ошибка' });
-  // res.status(500).send({ message: 'На сервере произошла ошибка' });
-  next();
+app.use((req, res, next, err) => {
+  if (!err.name === 'ValidatorError' || !err.name === 'CastError' || !err.statusCode === 404 || !err.statusCode === 409) {
+    //throw new InternalServerError({ message: 'Произошла ошибка' });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
+  }
+  // next();
 });
+
 app.listen(PORT, () => {
   console.log(`Express is Working in console ${PORT}`);
 });
