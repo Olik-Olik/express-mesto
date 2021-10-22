@@ -5,11 +5,13 @@ const linkValidate = require('validator/lib/isURL');
 /* const linkValidator (link) => {if linkValidator.Url(link) */
 /* const linkValidate = async () => await fetch(url) */
 
-const linkValidator = linkValidate.isUrl({
-  protocols: ['http', 'https', 'ftp'],
-  require_tld: true,
-  require_protocol: true,
-});
+function linkValidator(url) {
+  return linkValidate(url, {
+    protocols: ['http', 'https', 'ftp'],
+    require_tld: true,
+    require_protocol: true,
+  });
+}
 
 const userValidate = celebrate({
   body: Joi.object().keys({
@@ -36,7 +38,7 @@ const updateUserValidate = celebrate({
 const updateAvatarValidate = celebrate({
   body: Joi.object().keys({
     // url!!! посмотреть как
-    avatar: Joi.string().required().isUrl(),
+    avatar: linkValidator,
 
   }),
 });

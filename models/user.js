@@ -41,6 +41,10 @@ const userSchema = new mongoose.Schema({
       message: 'Измените формат почты-он неправильный',
     },
   },
+  /*  passwordSalt: {
+    type: String,
+    required: true,
+  }, */
   password: {
     type: String,
     required: true,
@@ -62,6 +66,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
           if (!matched) {
             return Promise.reject(new Error('Вообще-тут пароль в схеме Неправильный email или пароль'));
           }
+          // подумать как деструктурировать юзера и вычленить пароль без хеша
           return user;
         });
     });

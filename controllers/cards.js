@@ -11,7 +11,10 @@ module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.status(200).send({ cards }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }))
+    .catch(() => {
+      throw new InternalServerError({ message: 'Произошла ошибка' });
+    })
+    // .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }))
     .catch((err) => next(err));
 };
 
@@ -19,7 +22,7 @@ module.exports.createCard = (req, res, next) => {
   const newName = req.body.name;
   const newLink = req.body.link;
   return Card.create({
-    owner: req.user._id,
+    owner: req.userId,
     name: newName,
     link: newLink,
   })
@@ -31,12 +34,12 @@ module.exports.createCard = (req, res, next) => {
       }
       // eslint-disable-next-line no-lone-blocks
       {
-        throw new InternalServerError({ message: 'Произошла ошибка' });
+        //throw new InternalServerError({ message: 'Произошла ошибка' });
       }
-      // next(err);
-      //  res.status(500).send({ message: `Произошла ошибка:  ${err}` });
+      //next(err);
+      res.status(500).send({ message: `Произошла ошибка:  ${err}` });
     })
-    .catch((err) => next(err));
+    //.catch((err) => next(err));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -123,5 +126,5 @@ module.exports.dislikeCard = (req, res) => {
         // res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
-  // .catch(err => next(err)); ;
+  // .catch(err => next(err));
 };

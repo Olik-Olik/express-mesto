@@ -12,8 +12,11 @@ const InternalServerError = require('../errors/InternalServerError');// 500
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send({ users }))
-    .catch(next);
+    .catch(() => {
+      throw new InternalServerError({ message: 'Произошла ошибка' });
+    })
   // .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
+    .catch(next);
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -33,9 +36,12 @@ module.exports.getUser = (req, res, next) => {
         throw new BadRequestError('Невалидный id пользователя');
       //  res.status(400).send({ message: 'Невалидный id пользователя' });
       }
-      next(err);
+      // next(err);
       // .catch(err => next(err));
       //      res.status(500).send({ message: 'Произошла ошибка' });
+    })
+    .catch(() => {
+      throw new InternalServerError({ message: 'Произошла ошибка' });
     })
     .catch((err) => next(err));
 };
@@ -47,6 +53,9 @@ module.exports.getCurrentUser = (req, res, next) => {
       throw new NotFoundError({ message: 'Пользователь по данному id отсутствует  в базе' });
     })
     .then((user) => { res.send(user); })
+    .catch(() => {
+      throw new InternalServerError({ message: 'Произошла ошибка' });
+    })
     .catch((err) => next(err));
 };
 
