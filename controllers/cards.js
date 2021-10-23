@@ -5,17 +5,17 @@ const BadRequestError = require('../errors/BadRequestError');// 400 когда �
 // 401 когда что-то не так при аутентификации или авторизации;
 // const ConflictError = require('../errors/ConflictError');// 409 Conflict
 // const User = require('../models/user');
-const InternalServerError = require('../errors/InternalServerError');
-const {updateUserValidate} = require("../validator/validator");
+// const InternalServerError = require('../errors/InternalServerError');
+// const {updateUserValidate} = require("../validator/validator");
 
-module.exports.getCards = (req, res, next) => {
+module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.status(200).send({ cards }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err.message}` }));
 };
 
-module.exports.createCard = (req, res, next) => {
+module.exports.createCard = (req, res) => {
   const newName = req.body.name;
   const newLink = req.body.link;
   return Card.create({
@@ -41,8 +41,8 @@ module.exports.deleteCard = (req, res) => {
     })
     .then((card) => {
       // если собственник идентичен текущему юзеру
-      console.log('owner id ' + card.owner.toString());
-      console.log('user  id ' + req.userId);
+      console.log(`owner id ${card.owner.toString()}`);
+      console.log(`user  id ${req.userId}`);
       if (card.owner.toString() === req.userId) {
         Card.deleteOne({ _id: cardId })
           .then(() => res.status(200).send({ message: 'Карточка удалена.' }));
@@ -80,7 +80,6 @@ module.exports.likeCard = (req, res) => {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
-
 };
 
 module.exports.dislikeCard = (req, res) => {

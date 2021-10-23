@@ -3,8 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');// 404
-const BadRequestError = require('../errors/BadRequestError');// 400
-const UnAuthorizedError = require('../errors/UnAuthorizedError');// 401
 const ConflictError = require('../errors/ConflictError');// 409
 const InternalServerError = require('../errors/InternalServerError');// 500
 // const Card = require('../models/card');
@@ -15,7 +13,7 @@ module.exports.getUsers = (req, res) => {
     .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err}` }));
 };
 
-module.exports.getUser = (req, res, next) => {
+module.exports.getUser = (req, res) => {
   const userId = req.params.id;
   return User.findById(userId)
     .then((user) => {
@@ -32,7 +30,7 @@ module.exports.getUser = (req, res, next) => {
     });
 };
 
-module.exports.getCurrentUser = (req, res, next) => {
+module.exports.getCurrentUser = (req, res) => {
   const userId = req.params.id;
   return User.findById(userId)
     .orFail(() => {
@@ -41,11 +39,10 @@ module.exports.getCurrentUser = (req, res, next) => {
     .then((user) => { res.send(user); })
     .catch(() => {
       res.status(500).send({ message: 'Произошла ошибка' });
-
     });
 };
 
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = (req, res) => {
   //  хешируем пароль
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
@@ -74,16 +71,16 @@ module.exports.createUser = (req, res, next) => {
       )
       .catch((err) => {
         if (err.name === 'ValidatorError') {
-         res.status(400).send({ message: 'Невалидные данные Синтаксическая ошибка' });
+          res.status(400).send({ message: 'Невалидные данные Синтаксическая ошибка' });
         } else if (err.statusCode === 404) {
-           res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
+          res.status(404).send({ message: `Пользователь не создан, Невалидные данные: ${err}` });
         } else {
-           res.status(500).send({ message: 'Произошла ошибка' });
+          res.status(500).send({ message: 'Произошла ошибка' });
         }
       }));
 };
 
-module.exports.updateUser = (req, res, next) => {
+module.exports.updateUser = (req, res) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
   return User.findByIdAndUpdate({ _id: req.user._id }, {
@@ -97,10 +94,10 @@ module.exports.updateUser = (req, res, next) => {
 
     .catch((err) => {
       if (err.name === 'ValidatorError') {
-         res.status(400).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
+        res.status(400).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
       }
       if (err.name === 'CastError') {
-         res.status(400).send({ message: 'Невалидный id пользователя' });
+        res.status(400).send({ message: 'Невалидный id пользователя' });
       } else if (err.statusCode === 404) {
         res.status(404).send({ message: `Пользователь не изменен, Невалидные данные: ${err}` });
       } else {
@@ -109,7 +106,7 @@ module.exports.updateUser = (req, res, next) => {
     });
 };
 
-module.exports.login = (req, res, next) => {
+module.exports.login = (req, res) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
   User.findOne({ email: userEmail })
@@ -133,7 +130,7 @@ module.exports.login = (req, res, next) => {
     });
 };
 
-module.exports.updateAvatar = (req, res, next) => {
+module.exports.updateAvatar = (req, res) => {
   const newAvatar = req.body.avatar;
 
   return User.findByIdAndUpdate({ _id: req.user._id },

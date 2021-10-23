@@ -8,8 +8,8 @@ const router = require('express').Router(); // корневой роутер
 const routes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 require('./middlewares/auth');
-const NotFoundError = require('./errors/NotFoundError');
-const InternalServerError = require('./errors/InternalServerError');
+// const NotFoundError = require('./errors/NotFoundError');
+// const InternalServerError = require('./errors/InternalServerError');
 // const BadRequestError = require('../errors/BadRequestError');
 // const UnAuthorizedError = require('../errors/UnAuthorizedError');
 // const ConflictError = require('../errors/ConflictError');
@@ -33,11 +33,11 @@ app.use(routes);
 app.use(cardRoutes);
 app.use((req, res) => {
   res.status(404).send({ message: 'Нет такой страницЫ' });
-  //throw new NotFoundError({ message: 'Нет такой страницЫ' });
+  // throw new NotFoundError({ message: 'Нет такой страницЫ' });
 });
 app.use((req, res, next, err) => {
   if (!err.name === 'ValidatorError' || !err.name === 'CastError' || !err.statusCode === 404 || !err.statusCode === 409) {
-    //throw new InternalServerError({ message: 'Произошла ошибка' });
+    // throw new InternalServerError({ message: 'Произошла ошибка' });
     res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
   // next();
