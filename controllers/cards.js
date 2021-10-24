@@ -12,7 +12,7 @@ module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('user')
     .then((cards) => res.status(200).send({ cards }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err.message}` }));
+/*    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err.message}` }))*/;
 };
 
 module.exports.createCard = (req, res) => {
@@ -32,7 +32,7 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const cardId = req.params.id;
   Card.findById({ _id: cardId })
     //  выдает ошибку, если ни один документ не соответствует id
@@ -48,18 +48,10 @@ module.exports.deleteCard = (req, res) => {
           .then(() => res.status(200).send({ message: 'Карточка удалена.' }));
       }
       throw new Error('Чужие карточки не удаляют');
-    }).catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные id карты' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: `Невалидные данные: ${err.toString()}` });
-      } else {
-        res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
-      }
-    });
+    }).catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const cardId = req.params.id;
   const userId = req.user._id;
 
@@ -73,16 +65,10 @@ module.exports.likeCard = (req, res) => {
         throw new NotFoundError('Нет такого id для лайка');
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные для лайка' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const CardId = req.params.id;
   const UserId = req.user._id;
 
@@ -96,11 +82,5 @@ module.exports.dislikeCard = (req, res) => {
         throw new NotFoundError({ message: 'Нет такого id для лайка' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные для лайка' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
-      }
-    });
+    .catch(next);
 };

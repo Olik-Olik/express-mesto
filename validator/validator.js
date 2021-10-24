@@ -1,21 +1,11 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
-const linkValidate = require('validator/lib/isURL');
-
-/*
-function linkValidator(url) {
-  return linkValidate(url, {
-    protocols: ['http', 'https', 'ftp'],
-    require_tld: true,
-    require_protocol: true,
-  });
-}
-*/
 
 const validateURL = (value) => {
   if (!validator.isURL(value, { require_protocol: true })) {
     throw new Error('Неправильный формат ссылки');
-  } return value;
+  }
+  return value;
 };
 
 const userValidate = celebrate({
@@ -26,7 +16,6 @@ const userValidate = celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string()
       .regex(/(http|https):\/\/(www)?\.?([A-Za-z0-9.-]+)\.([A-z]{2,})((?:\/[+~%/.\w-_]*)?\??(?:[-=&;%@.\w_]*)#?(?:[\w]*))?/),
-/*    linkValidator,*/
     validateURL,
   }),
 });
@@ -47,7 +36,6 @@ const updateAvatarValidate = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string()
       .regex(/(http|https):\/\/(www)?\.?([A-Za-z0-9.-]+)\.([A-z]{2,})((?:\/[+~%/.\w-_]*)?\??(?:[-=&;%@.\w_]*)#?(?:[\w]*))?/).required(),
-/*    linkValidator,*/
     validateURL,
   }),
 });
