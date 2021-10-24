@@ -50,7 +50,7 @@ module.exports.deleteCard = (req, res) => {
       throw new Error('Чужие карточки не удаляют');
     }).catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные id карты ' });
+        res.status(400).send({ message: 'Некорректные данные id карты' });
       } else if (err.statusCode === 404) {
         res.status(404).send({ message: `Невалидные данные: ${err.toString()}` });
       } else {

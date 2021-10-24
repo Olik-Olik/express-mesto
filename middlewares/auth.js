@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
   if (!authorization || !authorization.startsWith('Bearer')) {
     return res.status(401).send({ message: 'Необходима авторизация' });
   }
-  const token = authorization.replace('Bearer: ', '');
+  const token = authorization.replace('Bearer ', '');
   try {
     // console.log(token);
     jwt.verify(token, 'some-secret-key');
@@ -20,8 +20,7 @@ module.exports = (req, res, next) => {
     // console.log(e);
     const err = new Error('Необходима авторизация');
     err.statusCode = 401;
-    return res.status(401).send({ message: 'Необходима авторизация' });
-    // next(err);
+    //   return res.status(401).send({ message: 'Необходима авторизация' });
+    next(err);
   }
 };
-// const extractBearerToken = (header) => header.replace('Bearer ', '');

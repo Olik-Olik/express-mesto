@@ -133,7 +133,7 @@ module.exports.login = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const newAvatar = req.body.avatar;
 
-  return User.findByIdAndUpdate({ _id: req.user._id },
+  return User.findByIdAndUpdate({ _id: req.userId },
     { avatar: newAvatar },
     { new: true, runValidators: true })
     // если не соответствует- то 404
