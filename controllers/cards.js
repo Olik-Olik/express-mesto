@@ -11,8 +11,7 @@ const BadRequestError = require('../errors/BadRequestError');// 400 когда �
 module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('user')
-    .then((cards) => res.status(200).send({ cards }))
-/*    .catch((err) => res.status(500).send({ message: `Произошла ошибка:  ${err.message}` }))*/;
+    .then((cards) => res.status(200).send({ cards }));
 };
 
 module.exports.createCard = (req, res) => {

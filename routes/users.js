@@ -11,9 +11,9 @@ const { updateAvatarValidate, updateUserValidate, userValidate } = require('../v
 const { idValidator } = require('../validator/validator');
 
 router.get('/users', getUsers);
-router.patch('/users/me'  , updateUserValidate, updateUser);
-router.post('/users'  , userValidate, createUser);
-router.patch('/users/me/avatar'  , updateAvatarValidate, updateAvatar);
-router.get('/users/:id' , userValidate, idValidator, getUser);
+router.patch('/users/me', updateUserValidate, updateUser);
+router.post('/users', userValidate, createUser);
+router.patch('/users/me/avatar', updateAvatarValidate, updateAvatar);
+router.get('/users/:id', userValidate, idValidator, getUser);
 
 module.exports = router;

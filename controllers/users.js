@@ -58,7 +58,7 @@ module.exports.createUser = (req, res, next) => {
             throw new NotFoundError({ message: 'Пользователь не создан' });
           }
           res.status(201).send({ user });
-        }
+        },
       )
       .catch(next));
 };
