@@ -1,12 +1,7 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFoundError');// 404 например, когда мы не нашли ресурс по переданному _id;
 const BadRequestError = require('../errors/BadRequestError');// 400 когда с запросом что-то не так; eslint-disable-next-line max-len
-// const UnAuthorizedError = require('../errors/UnAuthorizedError');
-// 401 когда что-то не так при аутентификации или авторизации;
-// const ConflictError = require('../errors/ConflictError');// 409 Conflict
-// const User = require('../models/user');
-// const InternalServerError = require('../errors/InternalServerError');
-// const {updateUserValidate} = require("../validator/validator");
+const ForbiddenError = require('../errors/ForbiddenError');// 403
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -14,7 +9,7 @@ module.exports.getCards = (req, res) => {
     .then((cards) => res.status(200).send({ cards }));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const newName = req.body.name;
   const newLink = req.body.link;
   return Card.create({
@@ -24,11 +19,12 @@ module.exports.createCard = (req, res) => {
   })
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Невалидный id пользователя');
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Невалидный id пользователя '));
       }
-      res.status(500).send({ message: `Произошла ошибка:  ${err.message}` });
-    });
+      next(err);
+      // res.status(500).send({ message: `Произошла ошибка:  ${err.message}` });
+    }).catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -45,8 +41,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (card.owner.toString() === req.userId) {
         Card.deleteOne({ _id: cardId })
           .then(() => res.status(200).send({ message: 'Карточка удалена.' }));
-      }
-      throw new Error('Чужие карточки не удаляют');
+      } else { throw new ForbiddenError('Чужие карточки не удаляют'); }
     }).catch(next);
 };
 

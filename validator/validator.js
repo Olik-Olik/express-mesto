@@ -16,7 +16,6 @@ const userValidate = celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string()
       .regex(/(http|https):\/\/(www)?\.?([A-Za-z0-9.-]+)\.([A-z]{2,})((?:\/[+~%/.\w-_]*)?\??(?:[-=&;%@.\w_]*)#?(?:[\w]*))?/),
-    validateURL,
   }),
 });
 const loginValidate = celebrate({
@@ -27,7 +26,7 @@ const loginValidate = celebrate({
 });
 const updateUserValidate = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
     about: Joi.string().min(2).max(30).required(),
   }),
 });
@@ -36,7 +35,6 @@ const updateAvatarValidate = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string()
       .regex(/(http|https):\/\/(www)?\.?([A-Za-z0-9.-]+)\.([A-z]{2,})((?:\/[+~%/.\w-_]*)?\??(?:[-=&;%@.\w_]*)#?(?:[\w]*))?/).required(),
-    validateURL,
   }),
 });
 

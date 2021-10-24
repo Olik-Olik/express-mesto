@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');// 404
 const ConflictError = require('../errors/ConflictError');// 409
-const InternalServerError = require('../errors/InternalServerError');// 500
+const UnAuthorizedError = require('../errors/UnAuthorizedError');// 401
 // const Card = require('../models/card');
 
 module.exports.getUsers = (req, res, next) => {
@@ -20,16 +20,16 @@ module.exports.getUser = (req, res, next) => {
       if (user) {
         res.status(200).send({ user });
       }
-      throw new NotFoundError({ message: 'Пользователь по данному id отсутствует  в базе' });
+      throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
     })
     .catch(next);
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  const userId = req.params.id;
+  const userId = req.user._id;
   return User.findById(userId)
     .orFail(() => {
-      throw new NotFoundError({ message: 'Пользователь по данному id отсутствует  в базе' });
+      throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
     })
     .then((user) => { res.send(user); })
     .catch(next);
@@ -45,28 +45,43 @@ module.exports.createUser = (req, res, next) => {
       email: req.body.email,
       password: hash,
     })
-      .catch((err) => {
-        if (err.name === 'MongoError' && err.code === 11000) {
-          throw new ConflictError({ message: 'Такой email в базе есть , придумывай другой ' });
-          // eslint-disable-next-line brace-style
-        }
-        throw new InternalServerError('Произошла ошибка');
-      })
       .then(
         (user) => {
           if (!user) {
-            throw new NotFoundError({ message: 'Пользователь не создан' });
+            throw new NotFoundError('Пользователь не создан');
           }
-          res.status(201).send({ user });
+          res.status(201).send({
+            data: {
+              name: user.name,
+              about: user.about,
+              avatar: user.avatar,
+              email: user.email,
+            },
+          });
         },
       )
+      .catch((err) => {
+        if (err.name === 'MongoError' && err.code === 11000) {
+          next(new ConflictError('Такой email в базе есть , придумывай другой '));
+        }
+        next(err);
+      })
+      .then((user) => res.status(201)
+        .send({
+          data: {
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        }))
       .catch(next));
 };
 
 module.exports.updateUser = (req, res, next) => {
   const newName = req.body.name;
   const newAbout = req.body.about;
-  return User.findByIdAndUpdate({ _id: req.user._id }, {
+  return User.findByIdAndUpdate({ _id: req.userId }, {
     name: newName,
     about: newAbout,
   }, { new: true, runValidators: true })
@@ -74,14 +89,13 @@ module.exports.updateUser = (req, res, next) => {
       throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
     })
     .then((user) => res.status(200).send({ user }))
-
     .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
-  User.findOne({ email: userEmail })
+  return User.findUserByCredentials(userEmail, userPassword)
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
@@ -97,7 +111,9 @@ module.exports.login = (req, res, next) => {
         { expiresIn: '7d' });
       res.status(201).send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      next(new UnAuthorizedError(err.message));
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -111,6 +127,5 @@ module.exports.updateAvatar = (req, res, next) => {
       throw new NotFoundError('Пользователь c данным id отсутствует  в базе');
     })
     .then((user) => res.status(200).send({ user }))
-
     .catch(next);
 };

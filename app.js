@@ -32,11 +32,12 @@ app.use(errors());
 app.use(() => {
 // if (err.statusCode === 404)
 //  res.status(404).send({ message: 'Нет такой страницЫ' });
-  throw new NotFoundError({ message: 'Нет такой страницЫ' });
+  throw new NotFoundError('Нет такой страницЫ');
 });
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+  next();
 });
 
 app.listen(PORT, () => {
