@@ -13,8 +13,10 @@
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
     "express-validator": "^6.12.2",
+    "express-winston": "^4.2.0",
     "mongoose": "^5.13.9",
-    "validator": "^13.6.0"
+    "validator": "^13.6.0",
+    "winston": "^3.3.3"
   },
   "scripts": {
     "start": "node app.js",

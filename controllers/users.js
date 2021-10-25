@@ -14,8 +14,8 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUser = (req, res, next) => {
-  const userId = req.params.id;
-  return User.findById(userId)
+  const myUserId = req.userId;
+  return User.findById(myUserId)
     .then((user) => {
       if (user) {
         res.status(200).send({ user });
@@ -26,8 +26,8 @@ module.exports.getUser = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  const userId = req.user._id;
-  return User.findById(userId)
+  const myUserId = req.userId;
+  return User.findById(myUserId)
     .orFail(() => {
       throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
     })
@@ -47,9 +47,6 @@ module.exports.createUser = (req, res, next) => {
     })
       .then(
         (user) => {
-          if (!user) {
-            throw new NotFoundError('Пользователь не создан');
-          }
           res.status(201).send({
             data: {
               name: user.name,
@@ -61,20 +58,11 @@ module.exports.createUser = (req, res, next) => {
         },
       )
       .catch((err) => {
-        if (err.name === 'MongoError' && err.code === 11000) {
+        if (err.code === 11000) {
           next(new ConflictError('Такой email в базе есть , придумывай другой '));
         }
         next(err);
       })
-      .then((user) => res.status(201)
-        .send({
-          data: {
-            name: user.name,
-            about: user.about,
-            avatar: user.avatar,
-            email: user.email,
-          },
-        }))
       .catch(next));
 };
 
@@ -95,7 +83,7 @@ module.exports.updateUser = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
-  return User.findUserByCredentials(userEmail, userPassword)
+  return User.findUserByCredentials(userEmail /* , userPassword */)
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {

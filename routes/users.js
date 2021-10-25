@@ -11,6 +11,6 @@ const { idValidator } = require('../validator/validator');
 router.get('/users', getUsers);
 router.patch('/users/me', updateUserValidate, updateUser);
 router.patch('/users/me/avatar', updateAvatarValidate, updateAvatar);
-router.get('/users/:id', userValidate, idValidator, getCurrentUser);
+router.get('/users/:id', idValidator, getCurrentUser);
 
 module.exports = router;
