@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const isEmail = require('validator/lib/isEmail');
 
 const isUrl = require('validator/lib/isURL');
+const InternalServerError = require("../errors/InternalServerError");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -57,17 +58,24 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильный email или пароль'));
+        console.log('User not found');
+        throw new Error('Неправильный email или пароль');
       }
       // eslint-disable-next-line no-undef
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return Promise.reject(new Error('Вообще-тут пароль в схеме Неправильный email или пароль'));
-          }
-          // подумать как деструктурировать юзера и вычленить пароль без хеша
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (err){
+          console.log(err);
+          throw new Error('Неправильный email или пароль');
+        }
+        console.log('Res: ' + res.toString());
+        if (res) {
+          console.log('Usr: ' + user.toString());
           return user;
-        });
+        }
+        throw new Error('Неправильный email или пароль');
+      });
+    }).catch(() => {
+      throw new InternalServerError();
     });
 };
 module.exports = mongoose.model('user', userSchema);

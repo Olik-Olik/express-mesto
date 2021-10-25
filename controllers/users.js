@@ -31,39 +31,42 @@ module.exports.getCurrentUser = (req, res, next) => {
     .orFail(() => {
       throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
     })
-    .then((user) => { res.send(user); })
+    .then((user) => {
+      res.send(user);
+    })
     .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
   //  хешируем пароль
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    User.create({
       name: req.body.name,
       about: req.body.about,
       avatar: req.body.avatar,
       email: req.body.email,
       password: hash,
-    })
-      .then(
-        (user) => {
-          res.status(201).send({
-            data: {
-              name: user.name,
-              about: user.about,
-              avatar: user.avatar,
-              email: user.email,
-            },
-          });
-        },
-      )
-      .catch((err) => {
-        if (err.code === 11000) {
+    }).then(
+      (user) => {
+        res.status(201).send({
+          data: {
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        });
+      },
+    )
+      // eslint-disable-next-line no-shadow
+      .catch((eerr) => {
+        if (eerr.code === 11000) {
           next(new ConflictError('Такой email в базе есть , придумывай другой '));
         }
-        next(err);
+        next(eerr);
       })
-      .catch(next));
+      .catch(next);
+  });
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -83,17 +86,17 @@ module.exports.updateUser = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
-  return User.findUserByCredentials(userEmail /* , userPassword */)
+
+/*
+  const waitUser = async () => {
+    const a = await address;
+    console.log(a);
+  };
+*/
+  return User.findUserByCredentials(userEmail, userPassword)
     // eslint-disable-next-line consistent-return
     .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error('Неправильная почта или пароль')); // отклоненный
-      }
-      const matched = bcrypt.compare(userPassword, user.password);
-      if (!matched) {
-        // eslint-disable-next-line max-len
-        return Promise.reject(new Error('Неправильный пароль или почта'));
-      }
+      console.log('Usr: ' + user.toString());
       const token = jwt.sign({ _id: user._id },
         'some-secret-key',
         { expiresIn: '7d' });
@@ -101,7 +104,8 @@ module.exports.login = (req, res, next) => {
     })
     .catch((err) => {
       next(new UnAuthorizedError(err.message));
-    });
+    })
+    .catch(next);
 };
 
 module.exports.updateAvatar = (req, res, next) => {

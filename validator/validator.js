@@ -46,7 +46,7 @@ const cardValidate = celebrate({
 });
 
 const idValidator = celebrate({
-  params: Joi.object().keys({
+  body: Joi.object().keys({
     id: Joi.string().length(24).hex().required(),
   }),
 });
