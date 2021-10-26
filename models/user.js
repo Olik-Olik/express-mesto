@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const isEmail = require('validator/lib/isEmail');
 
 const isUrl = require('validator/lib/isURL');
-const InternalServerError = require("../errors/InternalServerError");
+const ConflictError = require('../errors/ConflictError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -42,10 +42,7 @@ const userSchema = new mongoose.Schema({
       message: 'Измените формат почты-он неправильный',
     },
   },
-  /*  passwordSalt: {
-    type: String,
-    required: true,
-  }, */
+
   password: {
     type: String,
     required: true,
@@ -53,8 +50,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// eslint-disable-next-line func-names
-userSchema.statics.findUserByCredentials = function (email, password) {
+/* userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
@@ -77,5 +73,49 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     }).catch(() => {
       throw new InternalServerError();
     });
+}; */
+// eslint-disable-next-line func-names
+userSchema.statics.findUserByCredentials = function ({ email, password }) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return new ConflictError('Неправильный email или пароль');
+        // return Promise.reject(new Error('Неправильный email или пароль'));
+      }
+      return bcrypt.compare(password, user.password, (err, res) => {
+        if (err) {
+          console.log(err);
+          throw new Error('Неправильный email или пароль');
+        }
+        console.log(`Res: ${res.toString()}`);
+        if (res) {
+          console.log(`Usr: ${user.toString()}`);
+          return {
+            data: {
+              name: user.name,
+              about: user.about,
+              avatar: user.avatar,
+              email: user.email,
+            },
+          };
+        }
+        throw new Error('Неправильный email или пароль');
+      })
+        .then((matched) => {
+          if (!matched) {
+            throw new ConflictError('Неправильный email или пароль');
+            // return Promise.reject(new Error('Неправильный email или пароль'));
+          }
+          return {
+            data: {
+              name: user.name,
+              about: user.about,
+              avatar: user.avatar,
+              email: user.email,
+            },
+          };
+        });
+    });
 };
+
 module.exports = mongoose.model('user', userSchema);
