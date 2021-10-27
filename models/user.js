@@ -5,6 +5,7 @@ const isEmail = require('validator/lib/isEmail');
 const isUrl = require('validator/lib/isURL');
 const ConflictError = require('../errors/ConflictError');
 const InternalServerError = require('../errors/InternalServerError');
+const UnAuthorizedError = require("../errors/UnAuthorizedError");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -76,49 +77,28 @@ const userSchema = new mongoose.Schema({
     });
 }; */
 // eslint-disable-next-line func-names
-userSchema.statics.findUserByCredentials = function ({ email, password }) {
-  return this.findOne({ email }).select('+password')
+userSchema.statics.findUserByCredentials = function ({ userEmail, userPassword }) {
+  return this.findOne({ email: userEmail }).select('+password')
     .then((user) => {
       if (!user) {
         console.log('User not found');
-        return new ConflictError('Неправильный email или пароль');
+        throw new UnAuthorizedError('Неправильный email или пароль');
         // return Promise.reject(new Error('Неправильный email или пароль'));
       }
-      return bcrypt.compare(password, user.password, (err, res) => {
-        if (err) {
-          console.log(err);
-          throw new Error('Неправильный email или пароль');
-        }
-        console.log(`Res: ${res.toString()}`);
-        if (res) {
-          console.log(`Usr: ${user.toString()}`);
-          return {
-            data: {
-              name: user.name,
-              about: user.about,
-              avatar: user.avatar,
-              email: user.email,
-            },
-          };
-        }
-        throw new Error('Неправильный email или пароль');
-      })
-        .then((matched) => {
-          if (!matched) {
-            throw new ConflictError('Неправильный email или пароль');
-            // return Promise.reject(new Error('Неправильный email или пароль'));
-          }
-          return {
-            data: {
-              name: user.name,
-              about: user.about,
-              avatar: user.avatar,
-              email: user.email,
-            },
-          };
-        }).catch(() => {
-          throw new InternalServerError();
-        });
+      const matched = bcrypt.compareSync(userPassword, user.password);
+      if (matched) {
+        console.log(`Usr: ${user.toString()}`);
+        return {
+          data: {
+            id: user._id,
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        };
+      }
+      throw new UnAuthorizedError('Неправильный email или пароль');
     });
 };
 
