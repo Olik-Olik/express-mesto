@@ -12,26 +12,16 @@ module.exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUser = (req, res, next) => {
-  const myUserId = req.userId;
-  return User.findById(myUserId)
-    .then((user) => {
-      if (user) {
-        res.status(200).send({ user });
-      }
-      throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
-    })
-    .catch(next);
-};
-
 module.exports.getCurrentUser = (req, res, next) => {
   const myUserId = req.userId;
-  return User.findById(myUserId)
+  console.log(myUserId);
+  return User.findById({ _id: myUserId })
     .orFail(() => {
+      console.log('user not found');
       throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
     })
     .then((user) => {
-      res.send(user);
+      res.status(200).send(user);
     })
     .catch(next);
 };
@@ -87,7 +77,7 @@ module.exports.login = (req, res, next) => {
     if (!user) {
       throw new UnAuthorizedError();
     } else {
-      const token = jwt.sign({ _id: user.id },
+      const token = jwt.sign({ _id: user.data.id },
         'some-secret-key',
         { expiresIn: '7d' });
       res.status(201).send({ token });
