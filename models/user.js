@@ -50,30 +50,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-/* userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        console.log('User not found');
-        throw new Error('Неправильный email или пароль');
-      }
-      // eslint-disable-next-line no-undef
-      bcrypt.compare(password, user.password, (err, res) => {
-        if (err){
-          console.log(err);
-          throw new Error('Неправильный email или пароль');
-        }
-        console.log('Res: ' + res.toString());
-        if (res) {
-          console.log('Usr: ' + user.toString());
-          return user;
-        }
-        throw new Error('Неправильный email или пароль');
-      });
-    }).catch(() => {
-      throw new InternalServerError();
-    });
-}; */
 // eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function ({ userEmail, userPassword }) {
   return this.findOne({ email: userEmail }).select('+password')
