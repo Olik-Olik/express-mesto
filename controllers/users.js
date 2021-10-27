@@ -84,14 +84,13 @@ module.exports.login = (req, res, next) => {
   const userPassword = req.body.password;
 
   return User.findUserByCredentials({ userEmail, userPassword }).then((user) => {
-    if (!user){
+    if (!user) {
       throw new UnAuthorizedError();
     } else {
-      console.log('User: ' + user);
-      const token = jwt.sign({_id: user.id},
+      const token = jwt.sign({ _id: user.id },
         'some-secret-key',
-        {expiresIn: '7d'});
-      res.status(201).send({token});
+        { expiresIn: '7d' });
+      res.status(201).send({ token });
     }
   }).catch(next);
 };
