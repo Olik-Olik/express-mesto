@@ -4,6 +4,7 @@ const isEmail = require('validator/lib/isEmail');
 
 const isUrl = require('validator/lib/isURL');
 const ConflictError = require('../errors/ConflictError');
+const InternalServerError = require('../errors/InternalServerError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -79,6 +80,7 @@ userSchema.statics.findUserByCredentials = function ({ email, password }) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
+        console.log('User not found');
         return new ConflictError('Неправильный email или пароль');
         // return Promise.reject(new Error('Неправильный email или пароль'));
       }
@@ -114,6 +116,8 @@ userSchema.statics.findUserByCredentials = function ({ email, password }) {
               email: user.email,
             },
           };
+        }).catch(() => {
+          throw new InternalServerError();
         });
     });
 };

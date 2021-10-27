@@ -12,6 +12,7 @@ require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
 
 const { createUser, login } = require('./controllers/users');
+
 const PORT = 3623;
 const app = express();
 const url = 'mongodb://localhost:27017/mestodb';

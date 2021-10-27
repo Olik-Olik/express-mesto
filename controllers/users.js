@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');// 404
 const ConflictError = require('../errors/ConflictError');
-const BadRequestError = require('../errors/BadRequestError');
+const UnAuthorizedError = require('../errors/UnAuthorizedError');
 // 409
 // const UnAuthorizedError = require('../errors/UnAuthorizedError');// 401
 // const Card = require('../models/card');
@@ -72,32 +72,34 @@ module.exports.getCurrentUser = (req, res, next) => {
 }; */
 
 module.exports.createUser = (req, res, next) => {
+  // eslint-disable-next-line no-unused-expressions
+
   bcrypt.hash(req.body.password, 10)
-    .then((hash) => {
-      User.create({
-        name: req.body.name,
-        about: req.body.about,
-        avatar: req.body.avatar,
-        email: req.body.email,
-        password: hash,
+    .then((hash) => User.create({
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+      email: req.body.email,
+      password: hash,
+    })).catch((err) => {
+      if (err.name === 'MongoError' || err.code === 11000) {
+        throw new ConflictError('Такой email в базе есть , придумывай другой ');
+      } else next(err);
+    })
+    .then((user) => {
+      res.status(201).send({
+        data: {
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        },
       });
     })
-    .then(
-      (user) => {
-        if (!user) {
-          throw new NotFoundError('Пользователь не создан');
-        }
-        res.status(201).send({
-          data: {
-            name: user.name,
-            about: user.about,
-            avatar: user.avatar,
-            email: user.email,
-          },
-        });
-      },
-    )
-    .catch((eerr) => {
+    .catch(next);
+};
+
+/* .catch((eerr) => {
       if (eerr.code === 11000) {
         next(new ConflictError('Такой email в базе есть , придумывай другой '));
       } else {
@@ -106,9 +108,7 @@ module.exports.createUser = (req, res, next) => {
         next(new BadRequestError('Некорректные данные'));
       }
       next(eerr);
-    })
-    .catch(next);
-};
+    }) */
 
 module.exports.updateUser = (req, res, next) => {
   const newName = req.body.name;
@@ -153,25 +153,26 @@ module.exports.login = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email } = req.body;
   const { password } = req.body;
-  User.findOne({ email })
+  User.findUserByCredentials({ email, password })
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        throw new ConflictError('Неправильная почта или пароль');
+        return Promise.reject(new Error('Неправильная почта или пароль')); // отклоненный
       }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            throw new ConflictError('Неправильная почта или пароль');
-          } else {
-            const token = jwt.sign({ _id: user._id },
-              'some-secret-key',
-              { expiresIn: '7d' });
-            res.status(201).send({ token });
-          }
-        })
-        .catch(next);
-    });
+      const matched = bcrypt.compare(password, user.password);
+      if (!matched) {
+        // eslint-disable-next-line max-len
+        return Promise.reject(new Error('Неправильный пароль или почта'));
+      }
+      const token = jwt.sign({ _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' });
+      res.status(201).send({ token });
+    })
+    .catch((err) => {
+      next(new UnAuthorizedError(err.message));
+    })
+    .catch(next);
 };
 module.exports.updateAvatar = (req, res, next) => {
   const newAvatar = req.body.avatar;
