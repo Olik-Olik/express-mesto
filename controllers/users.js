@@ -12,6 +12,19 @@ module.exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
+module.exports.getUser = (req, res, next) => {
+  const userId = req.params.id;
+  return User.findById({ _id: userId })
+    .then((user) => {
+      if (user) {
+        res.status(200).send({ user });
+      } else {
+        throw new NotFoundError('Пользователь по данному id отсутствует  в базе');
+      }
+    })
+    .catch(next);
+};
+
 module.exports.getCurrentUser = (req, res, next) => {
   const myUserId = req.userId;
   console.log(myUserId);

@@ -3,7 +3,6 @@ require('celebrate');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');// не нужен
-const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const router = require('express').Router(); // корневой роутер
 const routes = require('./routes/users');
@@ -24,7 +23,6 @@ const { loginValidate, userValidate } = require('./validator/validator');
 mongoose.connect(url, { useNewUrlParser: true }, { useNewUrlParser: true });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 // Логгер запросов до  роутов
 // app.use(requestLogger);
